@@ -1,0 +1,45 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pr-reviewer-agent"
+version = "0.1.0"
+description = "Production-grade AI agent that automatically reviews GitHub Pull Requests with multi-agent LangGraph orchestration and RAG memory."
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "fastapi>=0.110.0",
+    "uvicorn[standard]>=0.28.0",
+    "pydantic>=2.6.0",
+    "pydantic-settings>=2.2.0",
+    "httpx>=0.27.0",
+    "structlog>=24.1.0",
+    "python-dotenv>=1.0.1",
+    # GitHub App authentication
+    "PyJWT[crypto]>=2.8.0",
+    "cryptography>=42.0.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.1.0",
+    "pytest-asyncio>=0.23.5",
+    "pytest-cov>=4.1.0",
+    "httpx>=0.27.0",
+    "black>=24.3.0",
+    "ruff>=0.3.0",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+select = ["E", "F", "I", "N", "W"]
+
+[tool.black]
+line-length = 100
+target-version = ["py311"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
