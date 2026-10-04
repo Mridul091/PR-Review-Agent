@@ -6,6 +6,7 @@ Usage anywhere in the project:
     logger = get_logger(__name__)
     logger.info("event_name", key="value")
 """
+
 import logging
 import sys
 from typing import Any

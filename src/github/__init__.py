@@ -1,7 +1,9 @@
 """GitHub integration package."""
+
 from src.github.auth import GitHubAppAuth
-from src.github.client import GitHubClient, PRMetadata, PRFile, ReviewComment
-from src.github.diff_parser import FileDiff, DiffHunk, DiffLine, parse_diff
+from src.github.client import GitHubClient, PRFile, PRMetadata, ReviewComment
+from src.github.diff_parser import DiffHunk, DiffLine, FileDiff, parse_diff
+from src.github.errors import GitHubClientError, InputLimitExceededError
 
 __all__ = [
     "GitHubAppAuth",
@@ -13,4 +15,6 @@ __all__ = [
     "DiffHunk",
     "DiffLine",
     "parse_diff",
+    "GitHubClientError",
+    "InputLimitExceededError",
 ]

@@ -1,0 +1,10 @@
+diff --git a/app.py b/app.py
+--- a/app.py
++++ b/app.py
+@@ -1,2 +1,2 @@
+ first = True
+-second = False
++second = True
+@@ -10 +10 @@
+-last = False
++last = True

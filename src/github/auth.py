@@ -121,8 +121,8 @@ class GitHubAppAuth:
         now = int(time.time())
 
         payload = {
-            "iat": now - 60,          # Issued 60s ago (handles clock skew)
-            "exp": now + (10 * 60),   # Expires in 10 minutes
+            "iat": now - 60,  # Issued 60s ago (handles clock skew)
+            "exp": now + (10 * 60),  # Expires in 10 minutes
             "iss": settings.GITHUB_APP_ID,
         }
 
@@ -182,9 +182,7 @@ class GitHubAppAuth:
         data = response.json()
 
         # Cache the token and its expiry
-        expires_at = datetime.fromisoformat(
-            data["expires_at"].replace("Z", "+00:00")
-        )
+        expires_at = datetime.fromisoformat(data["expires_at"].replace("Z", "+00:00"))
         self._token_cache[installation_id] = _CachedInstallationToken(
             token=data["token"],
             expires_at=expires_at,

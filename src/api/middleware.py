@@ -7,6 +7,7 @@ ensure the payload genuinely comes from GitHub and has not been tampered with.
 
 Reference: https://docs.github.com/en/webhooks/using-webhooks/validating-webhook-deliveries
 """
+
 import hashlib
 import hmac
 
@@ -26,8 +27,24 @@ async def verify_github_signature(request: Request) -> None:
         HTTPException 401 — if header is missing or signature does not match.
         HTTPException 400 — if signature algorithm is not sha256.
     """
-    # If no secret is configured (local dev without webhook tunnel), skip check
+    content_length = request.headers.get("content-length")
+    if content_length:
+        try:
+            declared_size = int(content_length)
+        except ValueError as exc:
+            raise HTTPException(status_code=400, detail="Invalid Content-Length header.") from exc
+        if declared_size > settings.MAX_WEBHOOK_BYTES:
+            raise HTTPException(status_code=413, detail="Webhook payload exceeds the size limit.")
+
+    body = await request.body()
+    if len(body) > settings.MAX_WEBHOOK_BYTES:
+        raise HTTPException(status_code=413, detail="Webhook payload exceeds the size limit.")
+
+    # Local development and tests may intentionally run without a GitHub secret.
     if not settings.GITHUB_WEBHOOK_SECRET:
+        if settings.ENVIRONMENT not in {"development", "test"}:
+            logger.error("webhook_secret_missing")
+            raise HTTPException(status_code=503, detail="Webhook verification is not configured.")
         logger.warning(
             "webhook_signature_skipped",
             reason="GITHUB_WEBHOOK_SECRET not configured",
@@ -47,7 +64,6 @@ async def verify_github_signature(request: Request) -> None:
     if algo != "sha256":
         raise HTTPException(status_code=400, detail=f"Unsupported signature algorithm: {algo}")
 
-    body = await request.body()
     expected_sig = hmac.new(
         settings.GITHUB_WEBHOOK_SECRET.encode("utf-8"),
         msg=body,

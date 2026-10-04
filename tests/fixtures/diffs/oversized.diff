@@ -1,0 +1,6 @@
+diff --git a/large.py b/large.py
+--- a/large.py
++++ b/large.py
+@@ -1 +1 @@
+-small = True
++this_patch_is_intentionally_larger_than_the_test_limit = True

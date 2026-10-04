@@ -1,0 +1,7 @@
+diff --git a/new.py b/new.py
+new file mode 100644
+--- /dev/null
++++ b/new.py
+@@ -0,0 +1,2 @@
++def answer():
++    return 42
