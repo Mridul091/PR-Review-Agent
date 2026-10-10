@@ -1,31 +1,44 @@
-.PHONY: install dev test lint format clean
+.PHONY: install dev test lint format format-check typecheck check hooks clean
 
-# Install dependencies into a virtualenv
+# Install dependencies (including the dev group) from uv.lock
 install:
-	python3 -m venv .venv
-	.venv/bin/pip install --upgrade pip
-	.venv/bin/pip install -e ".[dev]"
+	uv sync
 
 # Run the FastAPI dev server with hot-reload
 dev:
-	.venv/bin/uvicorn src.main:app --host 0.0.0.0 --port 8000 --reload
+	uv run uvicorn src.main:app --host 0.0.0.0 --port 8000 --reload
 
 # Run all tests with coverage
 test:
-	.venv/bin/pytest tests/ -v --cov=src --cov-report=term-missing
+	uv run pytest tests/ -v --cov=src --cov-report=term-missing
 
 # Lint with ruff
 lint:
-	.venv/bin/ruff check src/ tests/
+	uv run ruff check src/ tests/
 
-# Format with black
+# Format with ruff and apply safe lint fixes
 format:
-	.venv/bin/black src/ tests/
+	uv run ruff format src/ tests/
+	uv run ruff check --fix src/ tests/
+
+# Fail if any file needs formatting
+format-check:
+	uv run ruff format --check src/ tests/
+
+# Type check with pyright
+typecheck:
+	uv run pyright
+
+# Everything CI runs
+check: lint format-check typecheck
+	uv run pytest tests/ -q
+
+# Install the git pre-commit hooks
+hooks:
+	uv run pre-commit install
 
 # Remove build artifacts and caches
 clean:
-	find . -type d -name "__pycache__" -exec rm -rf {} +
-	find . -type d -name ".pytest_cache" -exec rm -rf {} +
-	find . -type d -name "*.egg-info" -exec rm -rf {} +
-	find . -name "*.pyc" -delete
-	rm -rf .coverage htmlcov/
+	find . -type d -name "__pycache__" -not -path "./.venv/*" -exec rm -rf {} +
+	find . -type d -name "*.egg-info" -not -path "./.venv/*" -exec rm -rf {} +
+	rm -rf .pytest_cache .ruff_cache .coverage htmlcov/

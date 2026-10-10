@@ -4,7 +4,7 @@ from pydantic import ValidationError
 from src.config import Settings
 from src.llm.factory import create_llm_provider
 from src.llm.fake import FakeLLMProvider
-from src.llm.groq_proivder import GroqProvider
+from src.llm.groq_provider import GroqProvider
 
 
 def test_fake_provider_can_be_selected_without_groq_key():

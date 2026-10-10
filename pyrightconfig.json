@@ -2,7 +2,20 @@
   "venvPath": ".",
   "venv": ".venv",
   "pythonVersion": "3.11",
-  "pythonPlatform": "Darwin",
   "include": ["src", "tests"],
-  "extraPaths": ["."]
+  "exclude": ["**/__pycache__", "**/*.egg-info"],
+  "extraPaths": ["."],
+  "typeCheckingMode": "standard",
+  "executionEnvironments": [
+    {
+      "root": "tests",
+      "extraPaths": ["."],
+      "reportArgumentType": "none",
+      "reportCallIssue": "none",
+      "reportAttributeAccessIssue": "none",
+      "reportFunctionMemberAccess": "none",
+      "reportOptionalSubscript": "none"
+    },
+    { "root": "src" }
+  ]
 }
