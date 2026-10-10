@@ -18,7 +18,7 @@ from src.llm.base import (
     ReviewResponseModel,
     TransientProviderError,
 )
-from src.llm.groq_proivder import GroqProvider
+from src.llm.groq_provider import GroqProvider
 from src.middleware.auth import AuthenticationMiddleware
 from src.review.schemas import ReviewRequest, ReviewStatus
 from src.review.service import ReviewService

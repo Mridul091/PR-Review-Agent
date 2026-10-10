@@ -3,7 +3,7 @@
 from src.config import Settings
 from src.llm.base import LLMProvider
 from src.llm.fake import FakeLLMProvider
-from src.llm.groq_proivder import GroqProvider
+from src.llm.groq_provider import GroqProvider
 
 
 def create_llm_provider(settings: Settings) -> LLMProvider:

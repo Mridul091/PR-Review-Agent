@@ -22,7 +22,7 @@ class ReviewStatus(str, Enum):
     PARTIAL = "partial"
     FAILED = "failed"
     REJECTED = "rejected"
-    QUEUD = "queud"
+    QUEUED = "queued"
     RUNNING = "running"
 
 
