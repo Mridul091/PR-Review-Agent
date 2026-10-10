@@ -132,7 +132,7 @@ class SQLiteReviewStore:
     async def _get_schema_version(self, db: aiosqlite.Connection) -> int:
         async with db.execute("PRAGMA user_version") as cursor:
             row = await cursor.fetchone()
-        return row[0]
+        return row[0] if row else 0
 
     async def _set_schema_version(self, db: aiosqlite.Connection, version: int):
         await db.execute(f"PRAGMA user_version = {version}")
@@ -161,7 +161,7 @@ class SQLiteReviewStore:
     async def _review_count(self, db: aiosqlite.Connection) -> int:
         async with db.execute("SELECT COUNT(*) FROM reviews") as cursor:
             row = await cursor.fetchone()
-        return row[0]
+        return row[0] if row else 0
 
     async def _create_reviews_table(self, db: aiosqlite.Connection):
         await db.execute("""

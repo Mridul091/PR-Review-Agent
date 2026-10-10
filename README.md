@@ -7,11 +7,18 @@ The current service provides secure webhook ingestion, GitHub App authentication
 ## Current flow
 
 ```text
-GitHub webhook
-  -> payload-size check
-  -> HMAC-SHA256 signature verification
-  -> pull_request payload validation
-  -> background review task
+GitHub webhook                      POST /api/v1/reviews
+  -> payload-size check               -> bearer token + repository allowlist
+  -> HMAC-SHA256 verification         -> inline review
+  -> payload validation               |
+  -> background review task           |
+         \___________________________/
+                      |
+                ReviewService
+  -> verify PR metadata and commit SHAs
+  -> fetch and budget the Python diff
+  -> bug detector (LLM_PROVIDER: fake or groq)
+  -> validate findings against diff paths and lines
   -> SQLite-persisted review result
 
 GitHub client
@@ -24,13 +31,15 @@ GitHub client
 ## Requirements
 
 - Python 3.11+
+- [uv](https://docs.astral.sh/uv/) for dependency management
 - A GitHub App for live GitHub requests
 
 ## Setup
 
 ```bash
 cp .env.example .env
-make install
+make install   # uv sync: creates .venv from uv.lock, including dev tools
+make hooks     # optional: install pre-commit hooks
 make dev
 ```
 
@@ -77,6 +86,7 @@ The service schedules reviews for `opened`, `synchronize`, and `reopened`. Other
 - `action`
 - `repository.full_name`
 - `pull_request.number`
+- `pull_request.base.sha` and `pull_request.head.sha`
 - `installation.id`
 
 In production, application startup fails when `GITHUB_WEBHOOK_SECRET` is absent. Development and test environments may omit it for local work and emit a warning.
@@ -84,9 +94,14 @@ In production, application startup fails when `GITHUB_WEBHOOK_SECRET` is absent.
 ## Validation
 
 ```bash
-make test
-make lint
+make check         # lint, format check, type check, tests (same as CI)
+make test          # tests with coverage
+make lint          # ruff check
+make format        # ruff format + safe lint fixes
+make typecheck     # pyright
 ```
+
+GitHub Actions runs the same checks plus gitleaks secret scanning on every push to `main` and every pull request. Pre-commit hooks run ruff, pyright, gitleaks, and basic file hygiene checks before each commit. Dependabot proposes weekly dependency and Actions updates.
 
 Diff fixtures cover added, modified, deleted, renamed, binary, empty, multi-hunk, header-like source content, and oversized input behavior. GitHub client tests use an in-process mock transport and never call GitHub.
 
@@ -97,3 +112,7 @@ Diff fixtures cover added, modified, deleted, renamed, binary, empty, multi-hunk
 - Missing GitHub `patch` fields are surfaced as unavailable because GitHub does not reliably distinguish binary content from omitted large patches in that response.
 - No findings are published to GitHub yet.
 - RAG, evaluations, and LangGraph orchestration remain future milestones.
+
+## Project status
+
+Milestones 1 and 2 of [ROADMAP.md](ROADMAP.md) are complete. See [PROJECT_SUMMARY.md](PROJECT_SUMMARY.md) for the current status snapshot and next steps.
