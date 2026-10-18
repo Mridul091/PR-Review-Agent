@@ -1,0 +1,12 @@
+diff --git a/app/billing/refunds.py b/app/billing/refunds.py
+new file mode 100644
+--- /dev/null
++++ b/app/billing/refunds.py
+@@ -0,0 +1,7 @@
++from app.billing import ledger
++
++
++def refund_order(order) -> None:
++    """Return the order total from the merchant to the customer."""
++    ledger.transfer(order.customer_account, order.merchant_account, order.total_cents)
++    order.mark_refunded()

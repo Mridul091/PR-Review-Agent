@@ -1,0 +1,5 @@
+id = "clean_intentional_assert_in_test"
+description = "Adds a test that deliberately calls a function with invalid input and asserts it raises. The bare-looking pytest.raises and the unused return value are intentional."
+split = "heldout"
+tags = ["clean", "tests", "suspicious"]
+expected = []

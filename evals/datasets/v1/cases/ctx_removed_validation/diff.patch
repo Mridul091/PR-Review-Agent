@@ -1,0 +1,18 @@
+diff --git a/app/api/accounts.py b/app/api/accounts.py
+--- a/app/api/accounts.py
++++ b/app/api/accounts.py
+@@ -1,4 +1,4 @@
+-from fastapi import APIRouter, HTTPException
++from fastapi import APIRouter
+ 
+ from app.services import AccountService
+ 
+@@ -7,7 +7,6 @@
+ 
+ @router.post("/accounts/{account_id}/withdraw")
+ def withdraw(account_id: int, amount_cents: int) -> dict:
+-    if amount_cents <= 0:
+-        raise HTTPException(status_code=422, detail="amount must be positive")
++    # Validation is handled in AccountService.
+     balance = AccountService().withdraw(account_id, amount_cents)
+     return {"balance_cents": balance}

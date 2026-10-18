@@ -1,0 +1,16 @@
+diff --git a/app/admin/diagnostics.py b/app/admin/diagnostics.py
+--- a/app/admin/diagnostics.py
++++ b/app/admin/diagnostics.py
+@@ -1,2 +1,12 @@
++import subprocess
++
++
+ def format_result(returncode: int) -> str:
+     return "reachable" if returncode == 0 else "unreachable"
++
++
++def ping_host(host: str) -> str:
++    result = subprocess.run(
++        f"ping -c 1 {host}", shell=True, capture_output=True, timeout=5
++    )
++    return format_result(result.returncode)

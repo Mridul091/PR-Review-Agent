@@ -1,0 +1,12 @@
+id = "ctx_removed_validation"
+description = "Removes the amount validation from the withdraw handler with a comment saying the service validates it. Elsewhere (not in this diff) AccountService.withdraw does not validate, so negative amounts now increase the balance."
+split = "dev"
+tags = ["bug", "needs_context", "validation"]
+
+[[expected]]
+file_path = "app/api/accounts.py"
+line_start = 10
+side = "RIGHT"
+category = "bug"
+defect_type = "removed_validation"
+summary = "Validation of amount > 0 was removed on the false assumption that AccountService.withdraw checks it; a negative amount now credits the account."

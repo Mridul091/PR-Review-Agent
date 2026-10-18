@@ -1,0 +1,23 @@
+diff --git a/app/ratelimit.py b/app/ratelimit.py
+--- a/app/ratelimit.py
++++ b/app/ratelimit.py
+@@ -1,12 +1,18 @@
++"""Sliding-window rate limiter kept in process memory.
++
++Not shared between workers: each process enforces its own limit.
++"""
+ import time
+ 
+ WINDOW_SECONDS = 60
+-LIMIT = 100
++LIMIT = 100  # maximum requests per key per window
+ 
+ _hits: dict[str, list[float]] = {}
+ 
+ 
+ def allow(key: str) -> bool:
++    """Return True and record the hit if `key` is under the limit."""
++    # monotonic() so wall-clock adjustments cannot reopen the window early.
+     now = time.monotonic()
+     recent = [t for t in _hits.get(key, []) if now - t < WINDOW_SECONDS]
+     if len(recent) >= LIMIT:

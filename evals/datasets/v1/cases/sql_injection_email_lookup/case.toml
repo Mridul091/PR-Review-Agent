@@ -1,0 +1,12 @@
+id = "sql_injection_email_lookup"
+description = "Adds find_user_by_email(), which builds the SQL query by interpolating the email into an f-string instead of using a bound parameter, so a crafted email can alter the query."
+split = "heldout"
+tags = ["security", "sql", "single_file"]
+
+[[expected]]
+file_path = "app/db/users.py"
+line_start = 21
+side = "RIGHT"
+category = "security"
+defect_type = "sql_injection"
+summary = "User-controlled email is interpolated into the SQL string; use a bound parameter (WHERE email = ?)."

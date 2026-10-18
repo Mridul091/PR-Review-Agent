@@ -1,0 +1,21 @@
+diff --git a/app/api/invoices.py b/app/api/invoices.py
+--- a/app/api/invoices.py
++++ b/app/api/invoices.py
+@@ -1,4 +1,4 @@
+-from fastapi import APIRouter, Depends
++from fastapi import APIRouter, Depends, HTTPException
+ 
+ from app.auth import current_user
+ from app.db import repo
+@@ -9,3 +9,11 @@
+ @router.get("/invoices")
+ def list_invoices(user=Depends(current_user)) -> list[dict]:
+     return [i.to_dict() for i in repo.invoices_for_user(user.id)]
++
++
++@router.get("/invoices/{invoice_id}")
++def get_invoice(invoice_id: int, user=Depends(current_user)) -> dict:
++    invoice = repo.get_invoice(invoice_id)
++    if invoice is None:
++        raise HTTPException(status_code=404, detail="Invoice not found")
++    return invoice.to_dict()

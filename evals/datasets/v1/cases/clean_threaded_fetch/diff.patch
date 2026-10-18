@@ -1,0 +1,39 @@
+diff --git a/app/tic_tac_toe.py b/app/tic_tac_toe.py
+--- a/app/tic_tac_toe.py
++++ b/app/tic_tac_toe.py
+@@ -1,17 +1,28 @@
++import threading
+ import time
+ 
+ def fetch_data(api_name, delay):
+-    print(f"Starting fetch for {api_name}...")
+-    time.sleep(delay)  # Simulating a slow network request
+-    print(f"Finished fetch for {api_name}!")
++    print(f"Starting fetch for {api_name}...\n", end="")
++    time.sleep(delay)  # The thread yields control here while waiting
++    print(f"Finished fetch for {api_name}!\n", end="")
+ 
+ def main():
+     start_time = time.time()
+ 
+-    # Executing tasks sequentially
+-    fetch_data("API_1", 2)
+-    fetch_data("API_2", 2)
+-    fetch_data("API_3", 2)
++    # 1. Create thread objects
++    t1 = threading.Thread(target=fetch_data, args=("API_1", 2))
++    t2 = threading.Thread(target=fetch_data, args=("API_2", 2))
++    t3 = threading.Thread(target=fetch_data, args=("API_3", 2))
++
++    # 2. Start the threads (they begin running in the background)
++    t1.start()
++    t2.start()
++    t3.start()
++
++    # 3. Wait for all threads to finish before moving on
++    t1.join()
++    t2.join()
++    t3.join()
+ 
+     end_time = time.time()
+     print(f"\nTotal execution time: {end_time - start_time:.2f} seconds")

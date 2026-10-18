@@ -1,0 +1,14 @@
+id = "missing_await_on_save"
+description = """Adds id validation and logging to an async job. The rewrite drops the \
+await on store.save(), which the removed line shows is a coroutine, so the result is \
+never persisted and Python warns that the coroutine was never awaited."""
+split = "dev"
+tags = ["async", "missing_await", "single_file"]
+
+[[expected]]
+file_path = "app/jobs.py"
+line_start = 13
+side = "RIGHT"
+category = "bug"
+defect_type = "missing_await"
+summary = "store.save() is a coroutine (awaited in the old code) but is no longer awaited, so the save never runs."

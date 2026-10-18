@@ -1,0 +1,13 @@
+id = "race_condition_lost_update"
+description = "Removes the lock around the shared balance counter, so two threads race on the read-modify-write and lose increments."
+split = "dev"
+tags = ["concurrency", "bug"]
+
+[[expected]]
+file_path = "app/tic_tac_toe.py"
+line_start = 11
+line_end = 13
+side = "RIGHT"
+category = "bug"
+defect_type = "race_condition"
+summary = "balance is read, modified and written without a lock, so concurrent threads lose updates."

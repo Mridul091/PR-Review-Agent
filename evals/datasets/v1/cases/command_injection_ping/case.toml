@@ -1,0 +1,12 @@
+id = "command_injection_ping"
+description = "Adds a diagnostics helper that pings a host entered by an admin. The host is interpolated into a shell command run with shell=True, so metacharacters in the host run arbitrary commands."
+split = "dev"
+tags = ["security", "subprocess", "single_file"]
+
+[[expected]]
+file_path = "app/admin/diagnostics.py"
+line_start = 9
+side = "RIGHT"
+category = "security"
+defect_type = "command_injection"
+summary = "User-supplied host is interpolated into a command run with shell=True; pass an argument list without a shell and validate the host."

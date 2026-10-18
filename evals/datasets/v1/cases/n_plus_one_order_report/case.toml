@@ -1,0 +1,12 @@
+id = "n_plus_one_order_report"
+description = "Adds order_report(), which runs one items_for_order query per order inside a loop, an N+1 query pattern that scales badly for users with many orders."
+split = "dev"
+tags = ["performance", "database", "single_file"]
+
+[[expected]]
+file_path = "app/orders/report.py"
+line_start = 12
+side = "RIGHT"
+category = "performance"
+defect_type = "n_plus_one_query"
+summary = "items_for_order is queried once per order inside the loop (N+1); fetch all items for the user's orders in one query and group them."

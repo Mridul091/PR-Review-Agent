@@ -24,7 +24,7 @@ This is a Python/FastAPI learning project for a GitHub PR reviewer agent. The in
 |---|---|
 | 1. Reliable input and review contracts | Complete |
 | 2. One reviewer working end to end | Complete |
-| 3. Baseline evaluation | Not started |
+| 3. Baseline evaluation | In progress: harness and 3 example cases; no real baseline yet |
 | 4. LangGraph state, verification, recovery | Not started (SQLite result storage already exists) |
 | 5. Repository RAG | Not started |
 | 6. Agent security and adversarial evaluation | Not started (basic input limits and auth boundaries exist) |
@@ -82,6 +82,16 @@ ReviewRequest (from POST /reviews or webhook)
 - Typed failures for GitHub, input, and model errors
 - Versioned SQLite store for review results; results survive restarts
 
+### Evaluation harness
+
+Files: `evals/` (guide in `evals/README.md`)
+
+- TOML case format with expected findings; `make_case` builds diffs from before/after files
+- Runner uses the real `ReviewService` with a local GitHub stand-in
+- Scoring: file + side + ±3-line matching, one-to-one; precision, recall, F1, clean-PR false-positive rate, location and category agreement
+- Markdown and JSON reports with dataset, prompt hash, model, and git SHA, plus an error-analysis section
+- `make eval`, `make eval-fake`; CI runs a fake-provider smoke run
+
 ### Tooling
 
 - **uv** with `uv.lock` and a `dev` dependency group
@@ -103,20 +113,21 @@ Tests cover config, webhook signatures and dispatch, GitHub auth and client beha
 
 1. **No webhook idempotency.** `X-GitHub-Delivery` is only logged, so redelivered events create duplicate reviews.
 2. **No durable job queue.** Webhook reviews run in FastAPI `BackgroundTasks`; in-progress work is lost on restart. `POST /reviews` runs the review inline within the request.
-3. **No evaluation harness.** Review quality is not measured yet.
+3. **Small eval dataset.** The harness exists (`evals/`), but there are only 3 cases and no real-model baseline yet.
 4. **No threat model or adversarial tests.**
 5. **Unused settings.** `OPENAI_API_KEY`, `ANTHROPIC_API_KEY`, `GEMINI_API_KEY`, `CHROMA_PERSIST_DIR`, and `EMBEDDING_MODEL` exist in `src/config.py` but are not used yet.
 
 ## Next steps
 
 1. **Webhook idempotency:** persist delivery IDs and review identity `(installation, repository, PR, head SHA)` with a UNIQUE constraint in SQLite; test duplicate deliveries.
-2. **Evaluation harness (milestone 3):** `evals/datasets/` with 5–10 synthetic Python PR cases to start, expected findings, and a runner measuring precision, recall, clean-PR false positives, and location accuracy. Record the diff-only baseline.
+2. **Evaluation (milestone 3):** write about 20 cases (about 7 clean, a third held out), record the first real baseline with `make eval ARGS="--repeats 3"`, and do error analysis on the report.
 3. **Security docs and tests:** `docs/threat-model.md` and prompt-injection fixtures (do not reveal secrets, do not obey PR instructions, do not publish without approval).
 4. **LangGraph (milestone 4):** `fetch -> normalize -> review -> verify -> aggregate -> save` with typed state, trace IDs, bounded retries, and no duplicate external effects.
 5. **Focused RAG (milestone 5):** index Python files, tests, and docs; retrieve callers/tests for changed symbols; compare diff-only vs. RAG in evals.
 
 ## Change log
 
+- **October 10, 2026 (evals):** Added the evaluation harness in `evals/` with 3 example cases, scoring tests, `make eval` targets, and a CI smoke run.
 - **October 10, 2026 (tooling):** Migrated to uv (removed `requirements.txt`, black replaced by ruff format), added pyright enforcement, pre-commit, `make check`, GitHub Actions CI, and Dependabot. Fixed two unchecked `fetchone()` results in `src/review/store.py`. Added the technology additions plan to `ROADMAP.md`.
 - **October 10, 2026:** Renamed `src/llm/groq_proivder.py` to `src/llm/groq_provider.py`; renamed `ReviewStatus.QUEUD = "queud"` to `ReviewStatus.QUEUED = "queued"` (no stored rows used the old value). Marked milestone 2 complete in `ROADMAP.md`.
 - **October 4, 2026:** Webhook wired to `ReviewService`, provider factory added, SQLite review store added.

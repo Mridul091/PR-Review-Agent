@@ -1,0 +1,6 @@
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Intentionally fake secret used as a labelled bug in an eval case"
+paths = ['''evals/datasets/v1/cases/hardcoded_api_secret/diff\.patch''']

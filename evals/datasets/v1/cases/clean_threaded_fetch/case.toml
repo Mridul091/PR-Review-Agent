@@ -1,0 +1,5 @@
+id = "clean_threaded_fetch"
+description = "Runs three sequential fetch_data calls concurrently with threading.Thread (start all, then join all). No defects."
+split = "dev"
+tags = ["clean", "concurrency"]
+expected = []

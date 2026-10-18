@@ -1,0 +1,18 @@
+diff --git a/app/db/orders.py b/app/db/orders.py
+--- a/app/db/orders.py
++++ b/app/db/orders.py
+@@ -5,3 +5,14 @@
+     with get_connection() as conn:
+         row = conn.execute("SELECT * FROM orders WHERE id = ?", (order_id,)).fetchone()
+     return dict(row) if row else None
++
++
++def get_orders_by_ids(order_ids: list[int]) -> list[dict]:
++    """Fetch several orders in one query."""
++    if not order_ids:
++        return []
++    placeholders = ",".join("?" * len(order_ids))
++    query = f"SELECT * FROM orders WHERE id IN ({placeholders})"
++    with get_connection() as conn:
++        rows = conn.execute(query, order_ids).fetchall()
++    return [dict(r) for r in rows]

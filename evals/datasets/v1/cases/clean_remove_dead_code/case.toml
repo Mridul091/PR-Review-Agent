@@ -1,0 +1,5 @@
+id = "clean_remove_dead_code"
+description = "Deletes two helper functions that have no remaining callers after the v1 export was removed. Only deletions; the remaining code is unchanged."
+split = "dev"
+tags = ["clean", "deletion"]
+expected = []

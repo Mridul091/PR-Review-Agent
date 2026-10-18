@@ -1,0 +1,7 @@
+id = "clean_extract_subtotal"
+description = """Behaviour-preserving refactor: extracts a _subtotal() helper and names the \
+discount constants. Totals, rounding, and the discount threshold are unchanged. Any \
+finding is a false positive."""
+split = "dev"
+tags = ["clean", "refactor"]
+expected = []

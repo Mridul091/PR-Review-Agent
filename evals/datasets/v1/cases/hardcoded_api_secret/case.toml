@@ -1,0 +1,12 @@
+id = "hardcoded_api_secret"
+description = "Adds a payment gateway client for the billing service. The API key is committed as a string literal in the source file instead of being read from configuration or the environment."
+split = "dev"
+tags = ["security", "secrets", "single_file"]
+
+[[expected]]
+file_path = "app/billing/gateway.py"
+line_start = 4
+side = "RIGHT"
+category = "security"
+defect_type = "hardcoded_secret"
+summary = "Live API key is hardcoded in source; load it from an environment variable or secret store and rotate the exposed key."

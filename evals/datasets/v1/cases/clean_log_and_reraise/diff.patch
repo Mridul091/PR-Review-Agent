@@ -1,0 +1,16 @@
+diff --git a/app/sync.py b/app/sync.py
+--- a/app/sync.py
++++ b/app/sync.py
+@@ -6,5 +6,10 @@
+ 
+ 
+ def sync_account(account_id: int) -> int:
+-    records = fetch_account(account_id)
+-    return push_records(account_id, records)
++    try:
++        records = fetch_account(account_id)
++        return push_records(account_id, records)
++    except Exception:
++        # Record which account failed, then let the scheduler's retry policy decide.
++        logger.exception("sync failed for account %s", account_id)
++        raise

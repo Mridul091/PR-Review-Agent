@@ -1,0 +1,21 @@
+diff --git a/tests/test_parse_amount.py b/tests/test_parse_amount.py
+--- a/tests/test_parse_amount.py
++++ b/tests/test_parse_amount.py
+@@ -1,5 +1,17 @@
++import pytest
++
+ from app.money import parse_amount
+ 
+ 
+ def test_parses_whole_dollars():
+     assert parse_amount("12") == 1200
++
++
++def test_rejects_negative_amounts():
++    with pytest.raises(ValueError, match="negative"):
++        parse_amount("-5")
++
++
++def test_rejects_garbage():
++    with pytest.raises(ValueError):
++        parse_amount("twelve")

@@ -1,0 +1,12 @@
+id = "inverted_bulk_discount"
+description = "Adds a bulk discount to apply_discount(). The docstring says orders of 10 or more items qualify, but the comparison is inverted, so small orders get the discount and large ones do not."
+split = "dev"
+tags = ["logic", "inverted_condition", "single_file"]
+
+[[expected]]
+file_path = "app/pricing.py"
+line_start = 14
+side = "RIGHT"
+category = "bug"
+defect_type = "inverted_condition"
+summary = "Condition is inverted: should be quantity >= BULK_THRESHOLD, per the docstring."

@@ -1,0 +1,30 @@
+diff --git a/app/inventory/sync.py b/app/inventory/sync.py
+--- a/app/inventory/sync.py
++++ b/app/inventory/sync.py
+@@ -5,3 +5,26 @@
+ 
+ def load_stock(client) -> dict[str, int]:
+     return {row["sku"]: row["qty"] for row in client.fetch_stock()}
++
++
++def prune_empty(stock: dict[str, int]) -> None:
++    """Remove SKUs that have no stock left."""
++    for sku, qty in stock.items():
++        if qty == 0:
++            del stock[sku]
++
++
++def apply_price_update(current_cents: float, new_cents: float) -> bool:
++    """Return True if the price changed."""
++    return current_cents != new_cents
++
++
++def push_updates(client, stock: dict[str, int]) -> int:
++    pushed = 0
++    for sku, qty in stock.items():
++        try:
++            client.update_stock(sku, qty)
++            pushed += 1
++        except Exception:
++            pass
++    return pushed

@@ -1,0 +1,29 @@
+diff --git a/src/pagination.py b/src/pagination.py
+--- a/src/pagination.py
++++ b/src/pagination.py
+@@ -1,8 +1,24 @@
+ """Pagination helpers for list endpoints."""
++
++import math
+ 
+ 
+ def first_page(items: list, page_size: int) -> list:
+     """Return the first page of items."""
++    return paginate(items, page=1, page_size=page_size)
++
++
++def paginate(items: list, page: int, page_size: int) -> list:
++    """Return one page of items. Pages are numbered from 1."""
++    if page < 1 or page_size < 1:
++        raise ValueError("page and page_size must be positive")
++    start = page * page_size
++    end = start + page_size
++    return items[start:end]
++
++
++def total_pages(items: list, page_size: int) -> int:
++    """Number of pages needed to show every item."""
+     if page_size < 1:
+         raise ValueError("page_size must be positive")
+-    return items[:page_size]
++    return math.ceil(len(items) / page_size)

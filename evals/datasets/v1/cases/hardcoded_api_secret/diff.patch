@@ -1,0 +1,26 @@
+diff --git a/app/billing/gateway.py b/app/billing/gateway.py
+new file mode 100644
+--- /dev/null
++++ b/app/billing/gateway.py
+@@ -0,0 +1,21 @@
++import httpx
++
++BASE_URL = "https://api.paygate.example/v1"
++API_KEY = "gw_live_51Hq9XkLmN3pQ7rStUvWxYz0123456789abcdef"
++
++
++class GatewayError(Exception):
++    pass
++
++
++def charge(customer_id: str, amount_cents: int, currency: str = "usd") -> str:
++    """Create a charge and return its id."""
++    response = httpx.post(
++        f"{BASE_URL}/charges",
++        headers={"Authorization": f"Bearer {API_KEY}"},
++        json={"customer": customer_id, "amount": amount_cents, "currency": currency},
++        timeout=10,
++    )
++    if response.status_code != 200:
++        raise GatewayError(f"charge failed: {response.status_code}")
++    return response.json()["id"]

@@ -1,0 +1,5 @@
+id = "tictactoe_symbol_property"
+description = "Adds the missing @property above Cell.symbol so the @symbol.setter works. No defects."
+split = "dev"
+tags = ["clean", "bugfix"]
+expected = []

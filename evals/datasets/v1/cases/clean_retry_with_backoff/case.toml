@@ -1,0 +1,5 @@
+id = "clean_retry_with_backoff"
+description = "Adds bounded retry with exponential backoff and jitter around get_json(). Only transient network errors are retried and the last failure is re-raised; the trailing raise is unreachable by design."
+split = "dev"
+tags = ["clean", "tricky", "retry"]
+expected = []
