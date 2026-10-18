@@ -85,6 +85,8 @@ async def run_case(
     tolerance: int = DEFAULT_TOLERANCE,
     max_context_chars: int = 20_000,
     max_model_attempts: int = 2,
+    max_output_tokens: int = 8_000,
+    timeout: int = 30,
 ) -> CaseRun:
     service = ReviewService(
         cast(GitHubAppAuth, _EvalAuth()),
@@ -93,6 +95,8 @@ async def run_case(
         model_name=model_name,
         max_context_chars=max_context_chars,
         max_model_attempts=max_model_attempts,
+        max_output_tokens=max_output_tokens,
+        timeout=timeout,
     )
     request = ReviewRequest(
         repository=_REPOSITORY,
@@ -128,6 +132,8 @@ async def run_dataset(
     tolerance: int = DEFAULT_TOLERANCE,
     max_context_chars: int = 20_000,
     max_model_attempts: int = 2,
+    max_output_tokens: int = 8_000,
+    timeout: int = 30,
     on_case: Callable[["CaseRun"], None] | None = None,
 ) -> list[RepeatResult]:
     """Run every case ``repeats`` times, sequentially to respect provider rate limits."""
@@ -143,6 +149,8 @@ async def run_dataset(
                 tolerance=tolerance,
                 max_context_chars=max_context_chars,
                 max_model_attempts=max_model_attempts,
+                max_output_tokens=max_output_tokens,
+                timeout=timeout,
             )
             if on_case is not None:
                 on_case(case_run)

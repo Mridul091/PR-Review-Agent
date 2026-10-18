@@ -3,12 +3,14 @@
 import argparse
 import asyncio
 import hashlib
+from collections import Counter
 from datetime import datetime, timezone
 from pathlib import Path
 
 from evals.dataset import DEFAULT_DATASET, load_cases
+from evals.ratelimit import RateLimitRetryProvider
 from evals.report import RunInfo, git_state, summarize, write_report
-from evals.runner import CaseRun, run_dataset
+from evals.runner import CaseRun, RepeatResult, run_dataset
 from evals.scoring import DEFAULT_TOLERANCE
 from src.agents.bug_detector import BUG_DETECTOR_PROMPT
 from src.config import settings
@@ -36,6 +38,12 @@ def _parse_args() -> argparse.Namespace:
     parser.add_argument("--provider", choices=["fake", "groq"], default=settings.LLM_PROVIDER)
     parser.add_argument("--model", help="Defaults to LLM_MODEL, or 'fake' with --provider fake")
     parser.add_argument("--repeats", type=int, default=1)
+    parser.add_argument(
+        "--max-output-tokens",
+        type=int,
+        default=2_000,
+        help="Output cap per review. Providers count it against token-per-minute limits.",
+    )
     parser.add_argument("--tolerance", type=int, default=DEFAULT_TOLERANCE)
     parser.add_argument("--out", type=Path, default=DEFAULT_REPORTS)
     parser.add_argument("--case", action="append", help="Run only these case ids")
@@ -45,6 +53,14 @@ def _parse_args() -> argparse.Namespace:
 def _print_progress(run: CaseRun) -> None:
     outcome = run.failure_code or f"TP={run.score.tp} FP={run.score.fp} FN={run.score.fn}"
     print(f"  [{run.repeat}] {run.case.id:<40} {outcome}  ({run.duration_ms} ms)")
+
+
+def _warn_if_mostly_failed(results: list[RepeatResult]) -> None:
+    runs = [run for result in results for run in result.case_runs]
+    codes = Counter(run.failure_code for run in runs if run.failure_code)
+    if sum(codes.values()) > len(runs) / 2:
+        print(f"\n  WARNING: {sum(codes.values())}/{len(runs)} reviews failed {dict(codes)}.")
+        print("  These scores do not measure the model; fix the failures first.")
 
 
 async def main() -> None:
@@ -60,7 +76,9 @@ async def main() -> None:
     if not cases:
         raise SystemExit("No cases selected.")
 
-    provider = create_llm_provider(settings.model_copy(update={"LLM_PROVIDER": args.provider}))
+    provider = RateLimitRetryProvider(
+        create_llm_provider(settings.model_copy(update={"LLM_PROVIDER": args.provider}))
+    )
     print(f"Running {len(cases)} cases x {args.repeats} with {args.provider}/{args.model}")
     try:
         results = await run_dataset(
@@ -71,12 +89,12 @@ async def main() -> None:
             tolerance=args.tolerance,
             max_context_chars=settings.MAX_REVIEW_CONTEXT_CHARS,
             max_model_attempts=settings.MAX_MODEL_ATTEMPTS,
+            max_output_tokens=args.max_output_tokens,
+            timeout=120,
             on_case=_print_progress,
         )
     finally:
-        close = getattr(provider, "aclose", None)
-        if close is not None:
-            await close()
+        await provider.aclose()
 
     sha, dirty = git_state()
     info = RunInfo(
@@ -97,6 +115,9 @@ async def main() -> None:
     for name, stats in summarize(results).items():
         mean = "n/a" if stats["mean"] is None else f"{stats['mean']:.2f}"
         print(f"  {name:<14} {mean}")
+    if provider.waits:
+        print(f"\n  waited {provider.seconds_waited:.0f}s over {provider.waits} rate-limit retries")
+    _warn_if_mostly_failed(results)
     print(f"\nReport: {md_path}\nData:   {json_path}")
 
 
