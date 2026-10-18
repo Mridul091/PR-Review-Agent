@@ -98,7 +98,7 @@ Look at the `dev` cases while improving prompts. Mark roughly a third of cases a
 ## Next steps
 
 - [ ] Grow the dataset to about 20 cases (about 7 clean), with roughly a third held out.
-- [ ] Record the first real baseline and commit the report.
+- [x] Record the first real baseline and commit the report (`reports/20261018-075131-dev-qwen-qwen3.8-27b.md`).
 - [ ] Record real model responses and replay them in CI, so scoring changes are tested against realistic output without paying for model calls.
 - [ ] Add an LLM judge that checks whether a matched finding describes the labelled defect; calibrate it against your own judgements on about 30 findings.
 - [ ] Track cost per review once `estimated_cost_usd` is computed (roadmap section B).
