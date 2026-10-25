@@ -9,6 +9,7 @@ from src.llm.base import (
     LLMProvider,
     MalformedProviderOutputError,
     ModelUsage,
+    ProviderRejectedError,
     RateLimitedError,
     ReviewModelRequest,
     ReviewResponseModel,
@@ -49,7 +50,9 @@ class GroqProvider(LLMProvider):
                 ) from exc
             if exc.status_code >= 500:
                 raise TransientProviderError("Provider temporarily unavailable") from exc
-            raise
+            raise ProviderRejectedError(
+                f"Provider rejected the request ({exc.status_code})", exc.status_code
+            ) from exc
 
         try:
             content = response.choices[0].message.content

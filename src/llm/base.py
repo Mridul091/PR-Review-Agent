@@ -30,6 +30,14 @@ class RateLimitedError(TransientProviderError):
         self.retry_after = retry_after
 
 
+class ProviderRejectedError(Exception):
+    """The provider refused the request (HTTP 4xx other than 429); retrying cannot help."""
+
+    def __init__(self, message: str, status_code: int | None = None) -> None:
+        super().__init__(message)
+        self.status_code = status_code
+
+
 class MalformedProviderOutputError(Exception):
     """The provider returned data that violates the review response contract."""
 
