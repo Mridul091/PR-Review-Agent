@@ -19,7 +19,7 @@ from pydantic import BaseModel, ConfigDict, Field, ValidationError
 
 from src.api.middleware import verify_github_signature
 from src.api.review import build_review_result, get_review_store
-from src.review.schemas import ReviewRequest
+from src.review.schemas import ReviewRequest, ReviewStatus
 from src.review.service import ReviewService
 from src.utils.logging import get_logger
 
@@ -81,8 +81,11 @@ async def _run_pr_review(
     action: str,
     service: ReviewService,
     request: Request,
+    delivery_id: str,
 ) -> None:
-    """Run a review and persist its result in SQLite."""
+    """Run a review, persist its result, and move the delivery's claim to its end state."""
+    store = get_review_store(request)
+    await store.update_claim_status(delivery_id, "running")
     logger.info(
         "pr_review_started",
         repo=review_request.repository,
@@ -96,14 +99,21 @@ async def _run_pr_review(
     try:
         run = await service.review(review_request)
         result = build_review_result(run)
-        await get_review_store(request).save_result(result)
+        await store.save_result(result)
     except Exception:
         logger.exception(
             "pr_review_failed_unexpectedly",
             repo=review_request.repository,
             pr_number=review_request.pull_request_number,
         )
+        # Release the claim so a redelivery can retry this commit.
+        await store.update_claim_status(delivery_id, "failed")
         return
+
+    # Only a failed review releases the claim; partial and rejected results are final.
+    await store.update_claim_status(
+        delivery_id, "failed" if result.status == ReviewStatus.FAILED else "completed"
+    )
 
     logger.info(
         "pr_review_finished",
@@ -201,7 +211,9 @@ async def github_webhook(
                 "pr_number": pr_number,
                 "message": f"Review job rejected because of duplicate PR #{pr_number} on {repo}.",
             }
-        background_tasks.add_task(_run_pr_review, review_request, action, service, request)
+        background_tasks.add_task(
+            _run_pr_review, review_request, action, service, request, delivery_id
+        )
 
         return {
             "status": "accepted",

@@ -28,7 +28,14 @@ class ReviewStore(Protocol):
         pull_request_number: int,
         head_sha: str,
     ) -> bool:
-        """Atomically record accepted work; return False if it was already claimed."""
+        """Atomically record accepted work; return False if it was already claimed.
+
+        A claim whose review ended in ``failed`` may be claimed again.
+        """
+        ...
+
+    async def update_claim_status(self, delivery_id: str, status: str) -> None:
+        """Move a claim to ``running``, ``completed`` or ``failed``."""
         ...
 
 
@@ -37,8 +44,9 @@ class InMemoryReviewStore:
 
     def __init__(self):
         self._results: dict[str, ReviewResult] = {}
-        self._claimed_deliveries: set[str] = set()
-        self._claimed_identities: set[tuple[int, str, int, str]] = set()
+        # identity -> status, and delivery id -> identity of the claim it currently owns.
+        self._claim_status: dict[tuple[int, str, int, str], str] = {}
+        self._claim_by_delivery: dict[str, tuple[int, str, int, str]] = {}
 
     async def initialize(self):
         return None
@@ -58,12 +66,20 @@ class InMemoryReviewStore:
         head_sha: str,
     ) -> bool:
         identity = (installation_id, repository, pull_request_number, head_sha)
-        # No await between the check and the insert, so this cannot interleave.
-        if delivery_id in self._claimed_deliveries or identity in self._claimed_identities:
+        # No await below, so the check and the writes cannot interleave.
+        status = self._claim_status.get(identity)
+        if status is not None and status != "failed":
             return False
-        self._claimed_deliveries.add(delivery_id)
-        self._claimed_identities.add(identity)
+        if status is None and delivery_id in self._claim_by_delivery:
+            return False
+        self._claim_status[identity] = "queued"
+        self._claim_by_delivery[delivery_id] = identity
         return True
+
+    async def update_claim_status(self, delivery_id: str, status: str) -> None:
+        identity = self._claim_by_delivery.get(delivery_id)
+        if identity is not None:
+            self._claim_status[identity] = status
 
 
 class SQLiteReviewStore:
@@ -320,5 +336,38 @@ class SQLiteReviewStore:
                     datetime.now(timezone.utc).isoformat(),
                 ),
             )
+            if cursor.rowcount == 1:
+                await db.commit()
+                return True
+
+            # Already claimed. Only a failed claim may be taken over, and the single
+            # UPDATE keeps that atomic: a concurrent reclaim sees 'queued' and gets 0 rows.
+            cursor = await db.execute(
+                """
+                UPDATE review_claims
+                SET delivery_id = ?, status = 'queued', created_at = ?
+                WHERE installation_id = ?
+                    AND repository = ?
+                    AND pull_request_number = ?
+                    AND head_sha = ?
+                    AND status = 'failed'
+                """,
+                (
+                    delivery_id,
+                    datetime.now(timezone.utc).isoformat(),
+                    installation_id,
+                    repository,
+                    pull_request_number,
+                    head_sha,
+                ),
+            )
             await db.commit()
             return cursor.rowcount == 1
+
+    async def update_claim_status(self, delivery_id: str, status: str) -> None:
+        async with aiosqlite.connect(self.database_path) as db:
+            await db.execute(
+                "UPDATE review_claims SET status = ? WHERE delivery_id = ?",
+                (status, delivery_id),
+            )
+            await db.commit()

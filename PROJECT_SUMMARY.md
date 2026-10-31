@@ -1,6 +1,6 @@
 # Project Summary
 
-Status snapshot of the PR Reviewer Agent: scope, progress, gaps, and next steps. Last updated October 25, 2026.
+Status snapshot of the PR Reviewer Agent: scope, progress, gaps, and next steps. Last updated October 31, 2026.
 
 ## Current project scope
 
@@ -79,8 +79,10 @@ ReviewRequest (from POST /reviews or webhook)
 - Provider factory selecting `fake` or `groq` from `LLM_PROVIDER` (`fake` is the default and is rejected in production; `GROQ_API_KEY` is required only for `groq`)
 - Python-focused bug detector with structured findings (defect, trigger, impact, recommendation, evidence, location)
 - Bounded retries for transient errors, one overall model deadline, output-token cap
-- Typed failures for GitHub, input, and model errors
+- Typed failures for GitHub, input, and model errors; model failures are split into `provider_rate_limited`, `provider_unavailable`, `provider_rejected` (4xx) and `provider_error` (unexpected), and only the exception class and HTTP status are logged, never the message text
 - Versioned SQLite store for review results; results survive restarts
+- Webhook idempotency: a `review_claims` table with `delivery_id` as primary key and a UNIQUE constraint on `(installation, repository, PR, head SHA)`; `claim_review` decides the winner atomically, duplicates get `202` with `status: "duplicate"`, and a missing `X-GitHub-Delivery` is rejected with `400`
+- Claim lifecycle: `queued` -> `running` -> `completed` or `failed`; a `failed` claim can be taken over by a later delivery of the same commit, so a failed review is retried on redelivery
 
 ### Evaluation harness
 
@@ -114,15 +116,16 @@ Tests cover config, webhook signatures and dispatch, GitHub auth and client beha
 
 ## Known gaps
 
-1. **No webhook idempotency.** `X-GitHub-Delivery` is only logged, so redelivered events create duplicate reviews.
+1. **Stale claims.** A claim stuck in `queued` or `running` (for example after a crash) is never reclaimed, so that commit is not reviewed again until a new commit arrives. Needs a staleness rule (claims older than N minutes may be taken over). `review_id` is also not yet stored on the claim, so a duplicate response cannot point to the existing review.
 2. **No durable job queue.** Webhook reviews run in FastAPI `BackgroundTasks`; in-progress work is lost on restart. `POST /reviews` runs the review inline within the request.
-3. **Eval baseline is dev-only.** The held-out split has not been run, and the `provider_error` failures and empty model outputs in the baseline are not yet diagnosed.
-4. **No threat model or adversarial tests.**
-5. **Unused settings.** `OPENAI_API_KEY`, `ANTHROPIC_API_KEY`, `GEMINI_API_KEY`, `CHROMA_PERSIST_DIR`, and `EMBEDDING_MODEL` exist in `src/config.py` but are not used yet.
+3. **Eval baseline is dev-only.** The held-out split has not been run. The baseline's `provider_error` failures were traced to the Groq tier's 1,000 output-tokens-per-minute limit, but the empty model outputs are not yet explained. `tictactoe_final_design` may be mislabelled as clean. `LLM_MODEL` in `.env` has a trailing comma.
+4. **Idempotency tests are incomplete.** Only `test_first_claim_wins` exists. The remaining store and webhook tests, and tests for the claim lifecycle, are listed in `IDEMPOTENCY_PLAN.md`.
+5. **No threat model or adversarial tests.**
+6. **Unused settings.** `OPENAI_API_KEY`, `ANTHROPIC_API_KEY`, `GEMINI_API_KEY`, `CHROMA_PERSIST_DIR`, and `EMBEDDING_MODEL` exist in `src/config.py` but are not used yet.
 
 ## Next steps
 
-1. **Webhook idempotency:** persist delivery IDs and review identity `(installation, repository, PR, head SHA)` with a UNIQUE constraint in SQLite; test duplicate deliveries.
+1. **Idempotency follow-ups:** write the deferred store and webhook tests (concurrent claims first), add a staleness rule for stuck claims, and store `review_id` on the claim.
 2. **Evaluation (milestone 3):** find out whether the `provider_error` failures are rate limits or timeouts, investigate the empty outputs, then run the held-out split once.
 3. **Security docs and tests:** `docs/threat-model.md` and prompt-injection fixtures (do not reveal secrets, do not obey PR instructions, do not publish without approval).
 4. **LangGraph (milestone 4):** `fetch -> normalize -> review -> verify -> aggregate -> save` with typed state, trace IDs, bounded retries, and no duplicate external effects.
@@ -130,6 +133,7 @@ Tests cover config, webhook signatures and dispatch, GitHub auth and client beha
 
 ## Change log
 
+- **October 31, 2026 (webhooks):** Added webhook idempotency (`review_claims` table, atomic `claim_review`, duplicate responses, `400` on a missing delivery header) and the claim lifecycle (`queued`/`running`/`completed`/`failed`, with failed claims reclaimable). Test client now uses a throwaway database. Added `provider_rate_limited`, `provider_unavailable` and `provider_rejected` failure codes with status logging.
 - **October 25, 2026 (evals):** Expanded the dataset to 30 cases (20 dev, 10 held-out), added the output format to the reviewer prompt and rate-limit waiting to evals, recorded the first dev baseline (qwen3.8-27b, 3 repeats), and filled in its error analysis.
 - **October 10, 2026 (evals):** Added the evaluation harness in `evals/` with 3 example cases, scoring tests, `make eval` targets, and a CI smoke run.
 - **October 10, 2026 (tooling):** Migrated to uv (removed `requirements.txt`, black replaced by ruff format), added pyright enforcement, pre-commit, `make check`, GitHub Actions CI, and Dependabot. Fixed two unchecked `fetchone()` results in `src/review/store.py`. Added the technology additions plan to `ROADMAP.md`.
