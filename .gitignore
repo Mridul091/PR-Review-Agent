@@ -44,3 +44,5 @@ dashboard/out/
 
 # macOS
 .DS_Store
+
+.agents
