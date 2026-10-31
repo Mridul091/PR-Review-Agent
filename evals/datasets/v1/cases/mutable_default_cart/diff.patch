@@ -1,0 +1,27 @@
+diff --git a/app/cart.py b/app/cart.py
+new file mode 100644
+--- /dev/null
++++ b/app/cart.py
+@@ -0,0 +1,22 @@
++from dataclasses import dataclass
++
++
++@dataclass
++class Item:
++    sku: str
++    price_cents: int
++    quantity: int = 1
++
++
++def add_item(item: Item, cart: list[Item] = []) -> list[Item]:
++    """Add an item to the cart, merging quantities for the same SKU."""
++    for existing in cart:
++        if existing.sku == item.sku:
++            existing.quantity += item.quantity
++            return cart
++    cart.append(item)
++    return cart
++
++
++def cart_total_cents(cart: list[Item]) -> int:
++    return sum(i.price_cents * i.quantity for i in cart)

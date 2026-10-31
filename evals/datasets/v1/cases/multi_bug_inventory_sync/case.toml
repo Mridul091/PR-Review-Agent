@@ -1,0 +1,28 @@
+id = "multi_bug_inventory_sync"
+description = "Adds three helpers to the inventory sync module, each with a different defect: prune_empty deletes from a dict while iterating it, apply_price_update compares floats with !=, and push_updates swallows every exception so failed pushes are silent."
+split = "heldout"
+tags = ["bug", "multi_bug", "single_file"]
+
+[[expected]]
+file_path = "app/inventory/sync.py"
+line_start = 14
+side = "RIGHT"
+category = "bug"
+defect_type = "mutation_during_iteration"
+summary = "Deleting from the dict while iterating over stock.items() raises RuntimeError (dictionary changed size during iteration)."
+
+[[expected]]
+file_path = "app/inventory/sync.py"
+line_start = 19
+side = "RIGHT"
+category = "bug"
+defect_type = "float_equality"
+summary = "Prices are compared with != on floats; rounding noise reports changes that did not happen. Use integer cents or a tolerance."
+
+[[expected]]
+file_path = "app/inventory/sync.py"
+line_start = 28
+side = "RIGHT"
+category = "quality"
+defect_type = "swallowed_exception"
+summary = "Every exception from update_stock is silently discarded; failures are neither logged nor counted, so pushed hides errors."

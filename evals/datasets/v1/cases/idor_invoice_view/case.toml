@@ -1,0 +1,12 @@
+id = "idor_invoice_view"
+description = "Adds GET /invoices/{invoice_id}. The handler requires a logged-in user but never checks that the invoice belongs to that user, so any user can read any invoice by changing the id."
+split = "dev"
+tags = ["security", "authorization", "single_file"]
+
+[[expected]]
+file_path = "app/api/invoices.py"
+line_start = 16
+side = "RIGHT"
+category = "security"
+defect_type = "missing_authorization"
+summary = "Invoice is fetched by id without verifying it belongs to current_user; any authenticated user can read other users' invoices."

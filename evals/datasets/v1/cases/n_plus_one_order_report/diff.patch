@@ -1,0 +1,23 @@
+diff --git a/app/orders/report.py b/app/orders/report.py
+--- a/app/orders/report.py
++++ b/app/orders/report.py
+@@ -3,3 +3,19 @@
+ 
+ def order_totals(user_id: int) -> list[dict]:
+     return [{"id": o.id, "total_cents": o.total_cents} for o in repo.orders_for_user(user_id)]
++
++
++def order_report(user_id: int) -> list[dict]:
++    """One row per order with its line items, for the account page."""
++    report = []
++    for order in repo.orders_for_user(user_id):
++        items = repo.items_for_order(order.id)  # one query per order
++        report.append(
++            {
++                "id": order.id,
++                "total_cents": order.total_cents,
++                "item_count": len(items),
++                "skus": [item.sku for item in items],
++            }
++        )
++    return report

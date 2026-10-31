@@ -1,0 +1,13 @@
+diff --git a/app/jobs/export.py b/app/jobs/export.py
+new file mode 100644
+--- /dev/null
++++ b/app/jobs/export.py
+@@ -0,0 +1,8 @@
++from app.jobs.queue import enqueue_export, wait_for_job
++
++EXPORT_TIMEOUT_MS = 30000
++
++
++def run_export(report_id: int) -> str:
++    job_id = enqueue_export(report_id)
++    return wait_for_job(job_id, EXPORT_TIMEOUT_MS)

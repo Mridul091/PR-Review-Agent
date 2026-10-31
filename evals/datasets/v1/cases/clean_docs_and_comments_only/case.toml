@@ -1,0 +1,5 @@
+id = "clean_docs_and_comments_only"
+description = "Adds a module docstring, type hints in comments, and explanatory comments to the rate limiter. No executable code changes."
+split = "dev"
+tags = ["clean", "docs"]
+expected = []

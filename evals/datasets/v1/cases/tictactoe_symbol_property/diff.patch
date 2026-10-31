@@ -1,0 +1,11 @@
+diff --git a/app/tic_tac_toe.py b/app/tic_tac_toe.py
+--- a/app/tic_tac_toe.py
++++ b/app/tic_tac_toe.py
+@@ -55,6 +55,7 @@
+     def is_empty(self) -> bool:
+         return self._symbol is None
+ 
++    @property
+     def symbol(self) -> Optional[Symbol]:
+         return self._symbol
+ 

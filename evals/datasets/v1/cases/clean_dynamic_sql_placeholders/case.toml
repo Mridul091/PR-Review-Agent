@@ -1,0 +1,5 @@
+id = "clean_dynamic_sql_placeholders"
+description = "Adds get_orders_by_ids(), which uses an f-string to build only the '?' placeholder list; the values are still bound parameters. Looks like SQL injection but is safe."
+split = "heldout"
+tags = ["clean", "tricky", "sql", "security"]
+expected = []

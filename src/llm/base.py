@@ -22,6 +22,22 @@ class TransientProviderError(Exception):
     """A provider/network failure for which a bounded retry is appropriate."""
 
 
+class RateLimitedError(TransientProviderError):
+    """The provider returned 429; ``retry_after`` is the advised wait in seconds."""
+
+    def __init__(self, message: str, retry_after: float | None = None) -> None:
+        super().__init__(message)
+        self.retry_after = retry_after
+
+
+class ProviderRejectedError(Exception):
+    """The provider refused the request (HTTP 4xx other than 429); retrying cannot help."""
+
+    def __init__(self, message: str, status_code: int | None = None) -> None:
+        super().__init__(message)
+        self.status_code = status_code
+
+
 class MalformedProviderOutputError(Exception):
     """The provider returned data that violates the review response contract."""
 

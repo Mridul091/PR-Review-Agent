@@ -2,7 +2,7 @@
   "venvPath": ".",
   "venv": ".venv",
   "pythonVersion": "3.11",
-  "include": ["src", "tests"],
+  "include": ["src", "tests", "evals"],
   "exclude": ["**/__pycache__", "**/*.egg-info"],
   "extraPaths": ["."],
   "typeCheckingMode": "standard",
@@ -16,6 +16,7 @@
       "reportFunctionMemberAccess": "none",
       "reportOptionalSubscript": "none"
     },
-    { "root": "src" }
+    { "root": "src" },
+    { "root": "evals", "extraPaths": ["."] }
   ]
 }

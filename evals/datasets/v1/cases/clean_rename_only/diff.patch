@@ -1,0 +1,18 @@
+diff --git a/app/orders/totals.py b/app/orders/totals.py
+--- a/app/orders/totals.py
++++ b/app/orders/totals.py
+@@ -1,11 +1,11 @@
+-def calc_tot(items, tax_rate):
++def calculate_total(items, tax_rate):
+     subtotal = sum(i.price_cents * i.quantity for i in items)
+     return subtotal + round(subtotal * tax_rate)
+ 
+ 
+ def order_summary(order):
+-    return {"id": order.id, "total_cents": calc_tot(order.items, order.tax_rate)}
++    return {"id": order.id, "total_cents": calculate_total(order.items, order.tax_rate)}
+ 
+ 
+ def invoice_total(order):
+-    return calc_tot(order.items, order.tax_rate) + order.shipping_cents
++    return calculate_total(order.items, order.tax_rate) + order.shipping_cents

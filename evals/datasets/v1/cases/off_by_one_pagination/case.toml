@@ -1,0 +1,14 @@
+id = "off_by_one_pagination"
+description = """Adds a paginate() helper with 1-based page numbers and routes first_page() \
+through it. The start offset uses page * page_size instead of (page - 1) * page_size, \
+so page 1 skips the first page of items and first_page() now returns the second page."""
+split = "dev"
+tags = ["off_by_one", "single_file", "new_function"]
+
+[[expected]]
+file_path = "src/pagination.py"
+line_start = 15
+side = "RIGHT"
+category = "bug"
+defect_type = "off_by_one"
+summary = "Start offset should be (page - 1) * page_size for 1-based pages; page 1 skips the first page_size items."

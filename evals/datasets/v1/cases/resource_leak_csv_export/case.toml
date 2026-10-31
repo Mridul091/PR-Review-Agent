@@ -1,0 +1,12 @@
+id = "resource_leak_csv_export"
+description = "New CSV export helper that opens the output file without a context manager; if writerow() raises (for example on a row with an unexpected key) the file is never closed."
+split = "heldout"
+tags = ["resource_leak", "new_file"]
+
+[[expected]]
+file_path = "app/exports.py"
+line_start = 13
+side = "RIGHT"
+category = "bug"
+defect_type = "resource_leak"
+summary = "File is closed only on the happy path; an exception in writerow() leaks the handle. Use 'with open(...)'."

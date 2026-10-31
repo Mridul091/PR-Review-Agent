@@ -1,4 +1,5 @@
 import json
+from collections.abc import Mapping
 
 from groq import APIConnectionError, APIStatusError, AsyncGroq
 from pydantic import ValidationError
@@ -8,10 +9,19 @@ from src.llm.base import (
     LLMProvider,
     MalformedProviderOutputError,
     ModelUsage,
+    ProviderRejectedError,
+    RateLimitedError,
     ReviewModelRequest,
     ReviewResponseModel,
     TransientProviderError,
 )
+
+
+def _retry_after(headers: Mapping[str, str]) -> float | None:
+    try:
+        return float(headers["retry-after"])
+    except (KeyError, ValueError):
+        return None
 
 
 class GroqProvider(LLMProvider):
@@ -34,9 +44,15 @@ class GroqProvider(LLMProvider):
         except APIConnectionError as exc:
             raise TransientProviderError("Provider connection failed") from exc
         except APIStatusError as exc:
-            if exc.status_code == 429 or exc.status_code >= 500:
+            if exc.status_code == 429:
+                raise RateLimitedError(
+                    "Provider rate limit reached", _retry_after(exc.response.headers)
+                ) from exc
+            if exc.status_code >= 500:
                 raise TransientProviderError("Provider temporarily unavailable") from exc
-            raise
+            raise ProviderRejectedError(
+                f"Provider rejected the request ({exc.status_code})", exc.status_code
+            ) from exc
 
         try:
             content = response.choices[0].message.content

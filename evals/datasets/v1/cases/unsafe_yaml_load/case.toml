@@ -1,0 +1,12 @@
+id = "unsafe_yaml_load"
+description = "Adds loading of per-tenant settings from an uploaded YAML file using yaml.load with the full Loader, which can construct arbitrary Python objects from untrusted input."
+split = "heldout"
+tags = ["security", "deserialization", "single_file"]
+
+[[expected]]
+file_path = "app/tenants/settings.py"
+line_start = 12
+side = "RIGHT"
+category = "security"
+defect_type = "unsafe_deserialization"
+summary = "yaml.load with yaml.Loader on user-uploaded content allows arbitrary object construction; use yaml.safe_load."

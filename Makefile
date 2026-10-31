@@ -1,4 +1,4 @@
-.PHONY: install dev test lint format format-check typecheck check hooks clean
+.PHONY: install dev test lint format format-check typecheck check hooks eval eval-fake clean
 
 # Install dependencies (including the dev group) from uv.lock
 install:
@@ -14,16 +14,16 @@ test:
 
 # Lint with ruff
 lint:
-	uv run ruff check src/ tests/
+	uv run ruff check src/ tests/ evals/
 
 # Format with ruff and apply safe lint fixes
 format:
-	uv run ruff format src/ tests/
-	uv run ruff check --fix src/ tests/
+	uv run ruff format src/ tests/ evals/
+	uv run ruff check --fix src/ tests/ evals/
 
 # Fail if any file needs formatting
 format-check:
-	uv run ruff format --check src/ tests/
+	uv run ruff format --check src/ tests/ evals/
 
 # Type check with pyright
 typecheck:
@@ -32,6 +32,15 @@ typecheck:
 # Everything CI runs
 check: lint format-check typecheck
 	uv run pytest tests/ -q
+
+# Run the eval suite with the configured LLM provider (calls the real model).
+# Pass options with ARGS, e.g. make eval ARGS="--repeats 3 --split all"
+eval:
+	uv run python -m evals.run $(ARGS)
+
+# Run the eval suite against the fake provider (free; checks the harness, not quality)
+eval-fake:
+	uv run python -m evals.run --provider fake --out $(or $(OUT),/tmp/pr-reviewer-evals) $(ARGS)
 
 # Install the git pre-commit hooks
 hooks:

@@ -1,0 +1,24 @@
+diff --git a/app/exports.py b/app/exports.py
+new file mode 100644
+--- /dev/null
++++ b/app/exports.py
+@@ -0,0 +1,19 @@
++import csv
++
++
++def read_rows(path: str) -> list[dict]:
++    with open(path, newline="") as f:
++        return list(csv.DictReader(f))
++
++
++def export_rows(path: str, rows: list[dict]) -> int:
++    """Write rows to a CSV file and return how many were written."""
++    if not rows:
++        return 0
++    f = open(path, "w", newline="")
++    writer = csv.DictWriter(f, fieldnames=list(rows[0].keys()))
++    writer.writeheader()
++    for row in rows:
++        writer.writerow(row)
++    f.close()
++    return len(rows)

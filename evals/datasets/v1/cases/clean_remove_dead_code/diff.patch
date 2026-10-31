@@ -1,0 +1,17 @@
+diff --git a/app/export/legacy.py b/app/export/legacy.py
+--- a/app/export/legacy.py
++++ b/app/export/legacy.py
+@@ -1,13 +1,4 @@
+ import csv
+-
+-
+-def write_rows_v1(path, rows):
+-    with open(path, "w", newline="") as f:
+-        csv.writer(f).writerows(rows)
+-
+-
+-def format_row_v1(row):
+-    return [str(v).strip() for v in row]
+ 
+ 
+ def write_rows(path, rows):

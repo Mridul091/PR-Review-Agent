@@ -1,0 +1,20 @@
+diff --git a/app/db/users.py b/app/db/users.py
+--- a/app/db/users.py
++++ b/app/db/users.py
+@@ -13,3 +13,16 @@
+             "SELECT id, email, name FROM users WHERE id = ?", (user_id,)
+         ).fetchone()
+     return dict(row) if row else None
++
++
++def find_user_by_email(email: str) -> dict | None:
++    """Look up a user by exact email address."""
++    with get_connection() as conn:
++        query = f"SELECT id, email, name FROM users WHERE email = '{email}'"
++        row = conn.execute(query).fetchone()
++    return dict(row) if row else None
++
++
++def deactivate_user(user_id: int) -> None:
++    with get_connection() as conn:
++        conn.execute("UPDATE users SET active = 0 WHERE id = ?", (user_id,))

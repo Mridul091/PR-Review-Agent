@@ -1,0 +1,5 @@
+id = "clean_rename_only"
+description = "Renames the helper calc_tot to calculate_total and updates both call sites in the same file. Behaviour is unchanged."
+split = "dev"
+tags = ["clean", "refactor", "rename"]
+expected = []

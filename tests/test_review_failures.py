@@ -15,6 +15,8 @@ from src.llm.base import (
     FindingDraft,
     MalformedProviderOutputError,
     ModelUsage,
+    ProviderRejectedError,
+    RateLimitedError,
     ReviewResponseModel,
     TransientProviderError,
 )
@@ -109,7 +111,7 @@ async def test_transient_retries_are_bounded_and_exhaustion_is_typed():
     provider = _Provider(*[TransientProviderError("secret") for _ in range(3)])
     result = build_review_result(await _service(provider, max_model_attempts=3).review(_request()))
     assert result.status == ReviewStatus.FAILED
-    assert result.failures[0].code == "provider_error"
+    assert result.failures[0].code == "provider_unavailable"
     assert result.failures[0].retryable
     assert "secret" not in result.failures[0].message
     assert result.agents_failed == ["bug_detector"]
@@ -169,6 +171,26 @@ async def test_permanent_provider_error_is_not_retried():
     provider = _Provider(RuntimeError("private payload"), _response())
     result = build_review_result(await _service(provider).review(_request()))
     assert result.failures[0].code == "provider_error"
+    assert not result.failures[0].retryable
+    assert "private payload" not in result.failures[0].message
+    assert provider.calls == 1
+
+
+@pytest.mark.asyncio
+async def test_rate_limit_exhaustion_is_typed_and_retryable():
+    provider = _Provider(*[RateLimitedError("secret", 5.0) for _ in range(2)])
+    result = build_review_result(await _service(provider).review(_request()))
+    assert result.failures[0].code == "provider_rate_limited"
+    assert result.failures[0].retryable
+    assert "secret" not in result.failures[0].message
+    assert provider.calls == 2
+
+
+@pytest.mark.asyncio
+async def test_provider_rejection_is_typed_and_not_retried():
+    provider = _Provider(ProviderRejectedError("private payload", 413), _response())
+    result = build_review_result(await _service(provider).review(_request()))
+    assert result.failures[0].code == "provider_rejected"
     assert not result.failures[0].retryable
     assert "private payload" not in result.failures[0].message
     assert provider.calls == 1

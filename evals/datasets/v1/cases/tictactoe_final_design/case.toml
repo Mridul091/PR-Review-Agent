@@ -1,0 +1,5 @@
+id = "tictactoe_final_design"
+description = "Refactor of tic-tac-toe: dataclasses, strategy pattern, undo support. No functional defects."
+split = "dev"
+tags = ["clean", "refactor", "large"]
+expected = []

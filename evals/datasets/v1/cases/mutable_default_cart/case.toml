@@ -1,0 +1,12 @@
+id = "mutable_default_cart"
+description = "New cart module whose add_item() uses a list as the default value for cart, so every call that omits the argument shares one cart across users and requests."
+split = "heldout"
+tags = ["mutable_default", "new_file"]
+
+[[expected]]
+file_path = "app/cart.py"
+line_start = 11
+side = "RIGHT"
+category = "bug"
+defect_type = "mutable_default"
+summary = "cart: list[Item] = [] is evaluated once; calls without a cart share and mutate the same list. Default to None."

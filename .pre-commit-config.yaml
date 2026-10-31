@@ -4,8 +4,11 @@ repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v5.0.0
     hooks:
+      # Unified diffs need their trailing spaces (blank context lines are " ").
       - id: trailing-whitespace
+        exclude: ^(evals/datasets/.*\.patch|tests/fixtures/diffs/.*\.diff|evals/reports/.*)$
       - id: end-of-file-fixer
+        exclude: ^(evals/datasets/.*\.patch|tests/fixtures/diffs/.*\.diff|evals/reports/.*)$
       - id: check-yaml
       - id: check-toml
       - id: check-added-large-files

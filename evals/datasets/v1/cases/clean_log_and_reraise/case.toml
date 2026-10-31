@@ -1,0 +1,5 @@
+id = "clean_log_and_reraise"
+description = "Wraps sync_account() in a broad except that logs the account id and re-raises. Looks like swallowed errors but the exception is propagated, so there is no defect."
+split = "dev"
+tags = ["clean", "tricky", "error_handling"]
+expected = []

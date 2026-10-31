@@ -1,0 +1,46 @@
+diff --git a/app/tic_tac_toe.py b/app/tic_tac_toe.py
+--- a/app/tic_tac_toe.py
++++ b/app/tic_tac_toe.py
+@@ -3,24 +3,21 @@
+ 
+ # Shared resource
+ balance = 0
+-balance_lock = threading.Lock()
+ 
+-def deposit_money():
++def deposit_money_bugged():
+     global balance
+     for _ in range(100000):
+-        # BEFORE THE BUG: Safely acquiring the lock
+-        with balance_lock:
+-            current_balance = balance
+-            time.sleep(0.000001)  # Simulates a tiny network/db delay
+-            balance = current_balance + 1
++        # AFTER THE BUG: Removed the lock. Threads now race!
++        current_balance = balance
++        time.sleep(0.000001)  # Context switch happens here
++        balance = current_balance + 1
+ 
+ def main():
+     global balance
+     balance = 0
+ 
+-    # Create two threads attempting to deposit money at the same time
+-    t1 = threading.Thread(target=deposit_money)
+-    t2 = threading.Thread(target=deposit_money)
++    t1 = threading.Thread(target=deposit_money_bugged)
++    t2 = threading.Thread(target=deposit_money_bugged)
+ 
+     t1.start()
+     t2.start()
+@@ -28,8 +25,8 @@
+     t1.join()
+     t2.join()
+ 
+-    # Expected output: 100,000 + 100,000 = 200,000
+-    print(f"Final Balance (Safe): {balance}")
++    # Bugged output: It will almost never reach 200,000
++    print(f"Final Balance (Bugged): {balance}")
+ 
+ if __name__ == "__main__":
+     main()

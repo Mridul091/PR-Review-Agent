@@ -1,0 +1,12 @@
+id = "path_traversal_download"
+description = "Adds a download endpoint that joins the user-supplied filename onto the uploads directory and returns the file. The filename is not normalised or checked, so '../' sequences can read arbitrary files."
+split = "dev"
+tags = ["security", "file_access", "single_file"]
+
+[[expected]]
+file_path = "app/api/files.py"
+line_start = 18
+side = "RIGHT"
+category = "security"
+defect_type = "path_traversal"
+summary = "User-supplied filename is joined to UPLOAD_DIR without resolving or checking it stays inside the directory, allowing ../ traversal."

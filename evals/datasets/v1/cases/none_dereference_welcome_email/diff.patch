@@ -1,0 +1,14 @@
+diff --git a/app/services/notifications.py b/app/services/notifications.py
+--- a/app/services/notifications.py
++++ b/app/services/notifications.py
+@@ -8,3 +8,10 @@
+         return False
+     send_email(user["email"], subject, body)
+     return True
++
++
++def welcome_user(user_id: int) -> None:
++    """Send the welcome email after sign-up."""
++    user = get_user_by_id(user_id)
++    greeting = f"Welcome, {user['name'].title()}!"
++    send_email(user["email"], "Welcome aboard", greeting)

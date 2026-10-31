@@ -186,3 +186,26 @@ async def test_review_result_fields_are_queryable_columns(tmp_path):
     assert row[4] == 2000
     assert '"model_calls":0' in row[5]
     assert '"code":"provider_error"' in row[6]
+
+
+@pytest.mark.asyncio
+async def test_first_claim_wins(tmp_path):
+    store = SQLiteReviewStore(f"sqlite:///{tmp_path / 'reviews.db'}")
+    await store.initialize()
+    won = await store.claim_review(
+        delivery_id="delivery-1",
+        installation_id=1,
+        repository="owner/repo",
+        pull_request_number=5,
+        head_sha="abc123",
+    )
+
+    assert won is True
+
+    async with aiosqlite.connect(tmp_path / "reviews.db") as db:
+        async with db.execute(
+            "SELECT delivery_id, installation_id, repository, pull_request_number, "
+            "head_sha, review_id, status FROM review_claims"
+        ) as cursor:
+            rows = await cursor.fetchall()
+    assert rows == [("delivery-1", 1, "owner/repo", 5, "abc123", None, "queued")]

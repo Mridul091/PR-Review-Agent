@@ -1,0 +1,17 @@
+diff --git a/app/tenants/settings.py b/app/tenants/settings.py
+--- a/app/tenants/settings.py
++++ b/app/tenants/settings.py
+@@ -1,5 +1,13 @@
++import yaml
++
+ DEFAULTS = {"theme": "light", "locale": "en"}
+ 
+ 
+ def merge_settings(overrides: dict) -> dict:
+     return {**DEFAULTS, **overrides}
++
++
++def load_uploaded_settings(raw: bytes) -> dict:
++    """Parse a settings file uploaded by a tenant admin."""
++    overrides = yaml.load(raw, Loader=yaml.Loader) or {}
++    return merge_settings(overrides)

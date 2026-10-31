@@ -1,0 +1,12 @@
+id = "ctx_swapped_transfer_args"
+description = "Adds a refund flow that calls transfer(). Elsewhere in the codebase (not in this diff) transfer is defined as transfer(source, destination, amount_cents). The refund passes the customer first and the merchant second, so money moves the wrong way."
+split = "dev"
+tags = ["bug", "needs_context", "arg_order"]
+
+[[expected]]
+file_path = "app/billing/refunds.py"
+line_start = 6
+side = "RIGHT"
+category = "bug"
+defect_type = "wrong_argument_order"
+summary = "transfer(source, destination, amount) is called with customer and merchant swapped, so a refund debits the customer and credits the merchant."

@@ -1,0 +1,12 @@
+id = "none_dereference_welcome_email"
+description = "Adds welcome_user(), which indexes the result of get_user_by_id() without checking for None, unlike the existing notify_user() above it."
+split = "heldout"
+tags = ["none_dereference", "single_file"]
+
+[[expected]]
+file_path = "app/services/notifications.py"
+line_start = 16
+side = "RIGHT"
+category = "bug"
+defect_type = "none_dereference"
+summary = "get_user_by_id() can return None; user['name'] raises TypeError for an unknown user_id."

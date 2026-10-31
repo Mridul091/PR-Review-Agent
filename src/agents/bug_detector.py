@@ -20,7 +20,8 @@ style preferences, formatting issues, pre-existing problems, or speculative
 concerns. A clean change must return an empty finding list.
 
 For every finding:
-- Choose an appropriate category and severity.
+- Set category to exactly one of: security, bug, quality, performance, testing.
+- Set severity to exactly one of: critical, high, medium, low, info.
 - Set confidence between 0 and 1.
 - Use the exact changed file path.
 - Provide accurate line_start and line_end values when the defect has a precise location.
@@ -28,7 +29,8 @@ For every finding:
 - Include a concise title.
 - Explain the defect, its trigger, and its impact.
 - Provide a specific recommendation.
-- Include evidence supporting the finding.
+- Include evidence supporting the finding. Each evidence item is an object with
+  source, file_path, and optionally line_start, line_end, and excerpt.
 - Use source=\"diff\" for changed-code evidence and source=\"repository\" for
   supporting repository evidence.
 - Do not invent file paths, line numbers, symbols, or behavior.
@@ -37,6 +39,21 @@ For every finding:
 Return only a JSON object with a draft_findings array. Each item must contain:
 category, severity, confidence, file_path, line_start, line_end, side, title,
 defect, trigger, impact, recommendation, and evidence.
+
+Use lowercase for category, severity, side, and source. Do not add fields that
+are not listed above.
+
+Example of one valid item:
+{"category": "bug", "severity": "high", "confidence": 0.9,
+ "file_path": "app/pricing.py", "line_start": 14, "line_end": 14, "side": "RIGHT",
+ "title": "Inverted discount condition",
+ "defect": "The comparison uses < where >= is required.",
+ "trigger": "An order at or above the bulk threshold.",
+ "impact": "Large orders do not receive the discount.",
+ "recommendation": "Use quantity >= BULK_THRESHOLD.",
+ "evidence": [{"source": "diff", "file_path": "app/pricing.py",
+               "line_start": 14, "line_end": 14,
+               "excerpt": "if quantity < BULK_THRESHOLD:"}]}
 
 Return an empty draft_findings array when no actionable defect is supported by
 the available evidence.

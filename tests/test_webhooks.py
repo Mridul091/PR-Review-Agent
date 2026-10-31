@@ -4,6 +4,7 @@ import asyncio
 import hashlib
 import hmac
 import json
+import uuid
 from datetime import datetime, timezone
 from types import SimpleNamespace
 
@@ -29,6 +30,15 @@ def reviewable_payload(number=42):
     }
 
 
+def delivery_headers(**extra):
+    """Headers for a reviewable delivery; each call gets a unique X-GitHub-Delivery."""
+    return {
+        "X-GitHub-Event": "pull_request",
+        "X-GitHub-Delivery": str(uuid.uuid4()),
+        **extra,
+    }
+
+
 def test_health_check(client):
     """GET /health should return 200 with healthy status."""
     response = client.get("/health")
@@ -48,7 +58,7 @@ def test_webhook_pr_opened_returns_202(client):
     response = client.post(
         "/api/v1/webhook",
         content=json.dumps(payload),
-        headers={"X-GitHub-Event": "pull_request", "Content-Type": "application/json"},
+        headers=delivery_headers(**{"Content-Type": "application/json"}),
     )
     assert response.status_code == 202
     data = response.json()
@@ -79,7 +89,7 @@ def test_webhook_uses_review_service_and_persists_result():
         response = client.post(
             "/api/v1/webhook",
             json=reviewable_payload(),
-            headers={"X-GitHub-Event": "pull_request"},
+            headers=delivery_headers(),
         )
 
     assert response.status_code == 202
@@ -106,7 +116,7 @@ def test_webhook_pr_synchronize_returns_202(client):
     response = client.post(
         "/api/v1/webhook",
         content=json.dumps(payload),
-        headers={"X-GitHub-Event": "pull_request", "Content-Type": "application/json"},
+        headers=delivery_headers(**{"Content-Type": "application/json"}),
     )
     assert response.status_code == 202
     assert response.json()["status"] == "accepted"
@@ -164,7 +174,7 @@ def test_webhook_rejects_invalid_json(client):
 def test_webhook_requires_valid_signature_when_configured(client, monkeypatch):
     secret = "test-webhook-secret"
     monkeypatch.setattr(settings, "GITHUB_WEBHOOK_SECRET", secret)
-    body = json.dumps(reviewable_payload()).encode()
+    body = json.dumps(reviewable_payload(number=43)).encode()
 
     missing = client.post(
         "/api/v1/webhook",
@@ -187,12 +197,10 @@ def test_webhook_requires_valid_signature_when_configured(client, monkeypatch):
     valid = client.post(
         "/api/v1/webhook",
         content=body,
-        headers={
-            "X-GitHub-Event": "pull_request",
-            "X-Hub-Signature-256": f"sha256={signature}",
-        },
+        headers=delivery_headers(**{"X-Hub-Signature-256": f"sha256={signature}"}),
     )
     assert valid.status_code == 202
+    assert valid.json()["status"] == "accepted"
 
 
 def test_webhook_rejects_oversized_payload(client, monkeypatch):

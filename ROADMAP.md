@@ -56,13 +56,13 @@ Done when: a fixture PR produces validated findings through the API, a clean PR 
 
 Dependency: milestone 2. Begin collecting fixtures during milestone 1.
 
-- [ ] Create `evals/datasets/`, a dataset schema, an evaluation runner, and a versioned report format.
-- [ ] Assemble 30–50 manually checked cases initially: labeled bugs, clean changes, context-dependent bugs, and ambiguous changes. Use public or synthetic code suitable for sharing.
+- [x] Create `evals/datasets/`, a dataset schema, an evaluation runner, and a versioned report format. (`evals/`; see `evals/README.md`.)
+- [ ] (30 of 30–50 written) Assemble 30–50 manually checked cases initially: labeled bugs, clean changes, context-dependent bugs, and ambiguous changes. Use public or synthetic code suitable for sharing.
 - [ ] Split development and held-out cases before prompt tuning; keep variants of the same bug in the same split.
-- [ ] Record expected bugs, acceptable evidence/locations, and issue-matching rules. Deduplicate predictions before scoring.
-- [ ] Measure finding precision, labeled-bug recall, clean-PR false-positive rate, location accuracy, latency, token usage, and cost.
-- [ ] Save dataset version, prompt/model configuration, and application revision with each experiment. Use human adjudication for disputed findings; an LLM judge is supplementary.
-- [ ] Establish the diff-only baseline and publish both successful and failed examples.
+- [ ] Record expected bugs, acceptable evidence/locations, and issue-matching rules. Deduplicate predictions before scoring. (Partial: labels and file/side/±N-line matching exist; duplicates currently count as false positives.)
+- [ ] Measure finding precision, labeled-bug recall, clean-PR false-positive rate, location accuracy, latency, token usage, and cost. (Partial: all except cost.)
+- [ ] Save dataset version, prompt/model configuration, and application revision with each experiment. Use human adjudication for disputed findings; an LLM judge is supplementary. (Partial: reports record dataset, prompt hash, model, git SHA; the report has an error-analysis section for human notes; no LLM judge yet.)
+- [ ] (Partial: first dev baseline recorded Oct 18, 2026 with qwen/qwen3.8-27b, 3 repeats: precision 0.84, recall 0.76, F1 0.79, clean FP rate 0.15; failed-example write-up and held-out run still to do) Establish the diff-only baseline and publish both successful and failed examples.
 
 Done when: one documented command runs the benchmark and generates a report with sample counts and clearly defined metrics. Set improvement targets after measuring this baseline; do not invent resume percentages.
 
@@ -200,7 +200,7 @@ Milestones 1 and 2 are complete. Next:
 
 1. ~~Developer tooling (section A)~~ — done October 10, 2026.
 2. Persist webhook delivery IDs and review identity `(installation, repository, PR, head SHA)` with database-level uniqueness so duplicate deliveries do not create duplicate reviews (pulled forward from milestone 4).
-3. Milestone 3 evaluation harness with a CI regression run (sections C).
+3. Milestone 3 evaluation: harness, example cases, and fake-provider CI smoke run done; 30 cases written and first dev baseline recorded; next fill in its error analysis, add performance cases, and reduce format failures (section C).
 4. Docker Compose, Postgres, and Alembic (section E).
 5. Structured outputs and a second provider (section B).
 6. OpenTelemetry and Langfuse (section D).

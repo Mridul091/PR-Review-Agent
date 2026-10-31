@@ -1,4 +1,5 @@
 import json
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Protocol
 
@@ -19,12 +20,25 @@ class ReviewStore(Protocol):
     async def get_result(self, review_id: str) -> ReviewResult | None:
         """Return a review result by ID, if present."""
 
+    async def claim_review(
+        self,
+        delivery_id: str,
+        installation_id: int,
+        repository: str,
+        pull_request_number: int,
+        head_sha: str,
+    ) -> bool:
+        """Atomically record accepted work; return False if it was already claimed."""
+        ...
+
 
 class InMemoryReviewStore:
     """Store review results in memory for tests and app instances without lifespan startup."""
 
     def __init__(self):
         self._results: dict[str, ReviewResult] = {}
+        self._claimed_deliveries: set[str] = set()
+        self._claimed_identities: set[tuple[int, str, int, str]] = set()
 
     async def initialize(self):
         return None
@@ -34,6 +48,22 @@ class InMemoryReviewStore:
 
     async def get_result(self, review_id: str):
         return self._results.get(review_id)
+
+    async def claim_review(
+        self,
+        delivery_id: str,
+        installation_id: int,
+        repository: str,
+        pull_request_number: int,
+        head_sha: str,
+    ) -> bool:
+        identity = (installation_id, repository, pull_request_number, head_sha)
+        # No await between the check and the insert, so this cannot interleave.
+        if delivery_id in self._claimed_deliveries or identity in self._claimed_identities:
+            return False
+        self._claimed_deliveries.add(delivery_id)
+        self._claimed_identities.add(identity)
+        return True
 
 
 class SQLiteReviewStore:
@@ -124,6 +154,10 @@ class SQLiteReviewStore:
                 else:
                     raise RuntimeError(f"Unexpected reviews table columns: {sorted(columns)}")
 
+                # Outside the user_version check: IF NOT EXISTS keeps this safe on
+                # every startup and leaves the reviews migration logic untouched.
+                await self._create_review_claims_table(db)
+
                 await db.commit()
             except Exception:
                 await db.rollback()
@@ -176,6 +210,25 @@ class SQLiteReviewStore:
                 usage_json TEXT NOT NULL,
                 failures_json TEXT NOT NULL,
                 created_at TEXT NOT NULL
+            )
+            """)
+
+    async def _create_review_claims_table(self, db: aiosqlite.Connection):
+        # A claim records that a webhook delivery was accepted, before any result
+        # exists. Two UNIQUE rules: the delivery (redelivery of the same event) and
+        # the review identity (different deliveries asking for the same work).
+        await db.execute("""
+            CREATE TABLE IF NOT EXISTS review_claims (
+                delivery_id TEXT PRIMARY KEY,
+                installation_id INTEGER NOT NULL,
+                repository TEXT NOT NULL,
+                pull_request_number INTEGER NOT NULL,
+                head_sha TEXT NOT NULL,
+                review_id TEXT,
+                status TEXT NOT NULL
+                    CHECK (status IN ('queued', 'running', 'completed', 'failed')),
+                created_at TEXT NOT NULL,
+                UNIQUE (installation_id, repository, pull_request_number, head_sha)
             )
             """)
 
@@ -234,3 +287,38 @@ class SQLiteReviewStore:
                 row = await cursor.fetchone()
 
         return ReviewResult.model_validate_json(row[0]) if row else None
+
+    async def claim_review(
+        self,
+        delivery_id: str,
+        installation_id: int,
+        repository: str,
+        pull_request_number: int,
+        head_sha: str,
+    ) -> bool:
+        # The UNIQUE constraints decide the winner, so concurrent claims cannot both succeed.
+        async with aiosqlite.connect(self.database_path) as db:
+            cursor = await db.execute(
+                """
+                INSERT OR IGNORE INTO review_claims (
+                    delivery_id,
+                    installation_id,
+                    repository,
+                    pull_request_number,
+                    head_sha,
+                    status,
+                    created_at
+                )
+                VALUES (?, ?, ?, ?, ?, 'queued', ?)
+                """,
+                (
+                    delivery_id,
+                    installation_id,
+                    repository,
+                    pull_request_number,
+                    head_sha,
+                    datetime.now(timezone.utc).isoformat(),
+                ),
+            )
+            await db.commit()
+            return cursor.rowcount == 1

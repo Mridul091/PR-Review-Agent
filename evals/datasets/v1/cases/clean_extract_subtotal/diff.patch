@@ -1,0 +1,32 @@
+diff --git a/src/pricing.py b/src/pricing.py
+--- a/src/pricing.py
++++ b/src/pricing.py
+@@ -1,17 +1,19 @@
+ """Order and invoice totals."""
++
++DISCOUNT_THRESHOLD = 100
++DISCOUNT_MULTIPLIER = 0.9
++
++
++def _subtotal(items):
++    return sum(item["price"] * item["quantity"] for item in items)
+ 
+ 
+ def order_total(items):
+-    total = 0
+-    for item in items:
+-        total += item["price"] * item["quantity"]
+-    if total > 100:
+-        total = total * 0.9
++    total = _subtotal(items)
++    if total > DISCOUNT_THRESHOLD:
++        total = total * DISCOUNT_MULTIPLIER
+     return round(total, 2)
+ 
+ 
+ def invoice_total(items, tax_rate):
+-    total = 0
+-    for item in items:
+-        total += item["price"] * item["quantity"]
+-    return round(total * (1 + tax_rate), 2)
++    return round(_subtotal(items) * (1 + tax_rate), 2)

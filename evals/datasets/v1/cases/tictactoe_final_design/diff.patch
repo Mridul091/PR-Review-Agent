@@ -1,0 +1,342 @@
+diff --git a/app/tic_tac_toe.py b/app/tic_tac_toe.py
+--- a/app/tic_tac_toe.py
++++ b/app/tic_tac_toe.py
+@@ -1,101 +1,260 @@
+-from ast import Tuple
++from abc import ABC, abstractmethod
+ from collections import defaultdict, deque
+-from sqlite3 import Row
+-from typing import Optional
+-from abc import ABC, abstractmethod
++from dataclasses import dataclass
++from enum import Enum
+ 
+ class GameError(Exception): ...
+ class GameOverError(GameError): ...
++class NothingToUndoError(GameError): ...
+ class InvalidMoveError(GameError): ...
+-class OutofBoundError(InvalidMoveError): ...
++class OutOfBoundsError(InvalidMoveError): ...
+ class CellOccupiedError(InvalidMoveError): ...
+ 
+ 
++
++@dataclass(frozen=True)
+ class Symbol:
+-    def __init__(self, mark: str) -> None:
+-        self._mark = mark
+-
+-    @property
+-    def mark(self) -> str:
+-        return self._mark
+-
+-    def __eq__(self, other: object) -> bool:
+-        if not isinstance(other, Symbol):
+-            return False
+-        return self._mark == other.mark
+-
+-    def __hash__(self) -> int:
+-        return hash(self._mark)
++    mark: str
+ 
+     def __repr__(self) -> str:
+-        return self._mark
+-
++        return self.mark
++
++
++@dataclass(frozen=True)
+ class Player:
+-    def __init__(self, name: str, symbol: Symbol) -> None:
+-        self._name: str = name
+-        self._symbol: Symbol = symbol
+-
+-    @property
+-    def name(self) -> str:
+-        return self._name
+-
+-    @property
+-    def symbol(self) -> Symbol:
+-        return self._symbol
++    name: str
++    symbol: Symbol
+ 
+     def __repr__(self) -> str:
+-        return f"{self._name} {self._symbol}"
+-
+-class Cell:
+-    def __init__(self, row: int, col: int, symbol: Optional[Symbol]=None) -> None:
+-        self._row: int = row
+-        self._col: int = col
+-        self._symbol: Optional[Symbol] = symbol
+-
+-    def is_empty(self) -> bool:
+-        return self._symbol is None
+-
+-    def symbol(self) -> Optional[Symbol]:
+-        return self._symbol
+-
+-    @symbol.setter
+-    def symbol(self, s: Symbol) -> None:
+-        self._symbol = s
+-
+-    @property
+-    def row(self) -> int:
+-        return self._row
+-
+-    @property
+-    def col(self) -> int:
+-        return self._col
++        return f"{self.name} {self.symbol}"
++
+ 
+ class Board:
+-    def __init__(self,size: int) -> None:
++    def __init__(self, size: int) -> None:
++        if size < 1:
++            raise ValueError("Board size must be greater than or equal to 1")
+         self._size = size
+-        self._grid: list[list[Cell]] = [[Cell(r, c) for c in range(size)] for r in range(size)]
++        self._grid: list[list[Symbol | None]] = [[None] * size for _ in range(size)]
+         self._filled_cells: int = 0
+ 
+-    def is_valid(self, r: int, c: int) -> bool:
+-        return 0 <= r <self._size and 0 <= c < self._size and self._grid[r][c].is_empty()
+-
+-    def is_empty(self, r:int, c: int) -> bool:
+-        return True if self._grid[r][c] else False
+-
+-    def place(self, r: int, c: int, symbol: Symbol):
+-        """ Place a symbol on the grid and return False if a move is illegal"""
+-
+-        if not self.is_valid(r,c):
+-            raise OutofBoundError(f"({r}, {c}) is outside of board")
+-
+-        if self._grid[r][c].is_empty():
+-            raise CellOccupiedError(f"({r}), {c} is already occupied")
+-
+-        self._grid[r][c].symbol = symbol
+-        self._filled_cells += 1
++    @property
++    def size(self) -> int:
++        return self._size
++
++    # ---- queries ----
++    def in_bounds(self, r: int, c: int) -> bool:
++        return 0 <= r < self._size and 0 <= c < self._size
++
++    def _check_bounds(self, r: int, c: int) -> None:
++        if not self.in_bounds(r, c):
++            raise OutOfBoundsError(f"({r}, {c}) is outside the board")
++
++    def is_empty(self, r: int, c: int) -> bool:
++        self._check_bounds(r, c)
++        return self._grid[r][c] is None
++
++    def get_symbol(self, r: int, c: int) -> Symbol | None:
++        self._check_bounds(r, c)
++        return self._grid[r][c]
+ 
+     def is_full(self) -> bool:
+         return self._filled_cells == self._size * self._size
+ 
+-    def get_symbol(self, r:int, c: int) -> Cell | None:
+-        return self._grid[r][c]
++    # ---- commands ----
++    def place(self, r: int, c: int, symbol: Symbol) -> None:
++        """Place a symbol; raise OutOfBoundsError / CellOccupiedError if illegal."""
++        self._check_bounds(r, c)
++        if self._grid[r][c] is not None:
++            raise CellOccupiedError(f"({r}, {c}) is already occupied")
++        self._grid[r][c] = symbol
++        self._filled_cells += 1
++
++    def clear(self, r: int, c: int) -> None:
++        """Reverse a placement; raise InvalidMoveError if the cell is already empty."""
++        self._check_bounds(r, c)
++        if self._grid[r][c] is None:
++            raise InvalidMoveError(f"({r}, {c}) is already empty")
++        self._grid[r][c] = None
++        self._filled_cells -= 1
++@dataclass(frozen=True)
++class Move:
++    row: int
++    col: int
++    player: Player
++
++
++
++class WinningStrategy(ABC):
++
++    @abstractmethod
++    def record_move(self, r: int, c: int, s: Symbol) -> bool:
++        ...
++
++    @abstractmethod
++    def undo_move(self, r: int, c: int, s: Symbol) -> None:
++        ...
++
++
++class RowColDiagonalStrategy(WinningStrategy):
++
++    def __init__(self, size: int) -> None:
++        self._size = size
++        self._row_counts: dict[Symbol, list[int]] = defaultdict(lambda: [0] * size)
++        self._col_counts: dict[Symbol, list[int]] = defaultdict(lambda: [0] * size)
++        self._diag_count: dict[Symbol, int] = defaultdict(int)
++        self._anti_diag_count: dict[Symbol, int] = defaultdict(int)
++
++    def _apply(self, r: int, c: int, s: Symbol, delta: int) -> None:
++        self._row_counts[s][r] += delta
++        self._col_counts[s][c] += delta
++        if r == c:
++            self._diag_count[s] += delta
++        if r + c == self._size - 1:
++            self._anti_diag_count[s] += delta
++
++    def record_move(self, r: int, c: int, s: Symbol) -> bool:
++        self._apply(r, c, s, +1)
++        n = self._size
++        return (self._row_counts[s][r] == n
++                or self._col_counts[s][c] == n
++                or self._diag_count[s] == n
++                or self._anti_diag_count[s] == n)
++
++    def undo_move(self, r: int, c: int, s: Symbol) -> None:
++        self._apply(r, c, s, -1)
++
++
++class GameState(Enum):
++    IN_PROGRESS = "IN_PROGRESS"
++    WIN = "WIN"
++    DRAW = "DRAW"
++
++
++class Game:
++    def __init__(self, board: Board, player_list: list[Player], strategy: WinningStrategy) -> None:
++        if len(player_list) < 2:
++            raise ValueError("At least 2 players are required")
++        if len({p.symbol for p in player_list}) != len(player_list):
++            raise ValueError("Players must have distinct symbols")
++        self._board = board
++        self._players: deque[Player] = deque(player_list)
++        self._strategy = strategy
++        self._state: GameState = GameState.IN_PROGRESS
++        self._winner: Player | None = None
++        self._history: list[Move] = []
++
++    def move(self, row: int, col: int) -> GameState:
++        if self._state != GameState.IN_PROGRESS:
++            raise GameOverError("Game is already over")
++
++        current_player = self._players[0]
++        self._board.place(row, col, current_player.symbol)
++
++        if self._strategy.record_move(row, col, current_player.symbol):
++            self._state = GameState.WIN
++            self._winner = current_player
++
++        elif self._board.is_full():
++            self._state = GameState.DRAW
++        else:
++            self._players.rotate(-1)
++        self._history.append(Move(row, col, current_player))
++        return self._state
++
++    def undo_move(self):
++        if not self._history:
++            raise NothingToUndoError
++
++        move = self._history.pop()
++        self._board.clear(move.row, move.col)
++        self._strategy.undo_move(move.row, move.col, move.player.symbol)
++        while self._players[0]!= move.player:
++            self._players.rotate(1)
++        self._state = GameState.IN_PROGRESS
++        self._winner = None
++
++
++    @property
++    def current_player(self) -> Player:
++        return self._players[0]
++
++    @property
++    def board(self) -> Board:
++        return self._board
++
++    @property
++    def state(self) -> GameState:
++        return self._state
++
++    @property
++    def winner(self) -> Player | None:
++        return self._winner
++
++
++class GameView(ABC):
++    @abstractmethod
++    def show_board(self, board: Board) -> None: ...
++
++    @abstractmethod
++    def ask_move(self, player: Player) -> tuple[int, int]: ...
++
++    @abstractmethod
++    def show_error(self, message: str) -> None: ...
++
++    @abstractmethod
++    def show_result(self, state: GameState, winner: Player | None) -> None: ...
++
++
++class ConsoleView(GameView):
++    def show_board(self, board: Board) -> None:
++        for r in range(board.size):
++            print(" | ".join(str(board.get_symbol(r, c) or " ") for c in range(board.size)))
++            if r < board.size - 1:
++                print("-" * (board.size * 4 - 3))
++
++    def ask_move(self, player: Player) -> tuple[int, int]:
++        while True:
++            raw = input(f"{player.name} ({player.symbol}), enter row col: ")
++            try:
++                r, c = map(int, raw.split())
++                return r, c
++            except ValueError:
++                print("Please input two numbers, e.g. '1 2'")
++
++    def show_error(self, message: str) -> None:
++        print(f"✗ {message}")
++
++    def show_result(self, state: GameState, winner: Player | None) -> None:
++        if winner is not None:
++            print(f"{winner.name} wins!")
++        else:
++            print("It's a draw.")
++
++
++class GameController:
++    def __init__(self, game: Game, game_view: GameView) -> None:
++        self._game = game
++        self._view = game_view
++
++    def run(self) -> None:
++        while self._game.state == GameState.IN_PROGRESS:
++            self._view.show_board(self._game.board)
++            r, c = self._view.ask_move(self._game.current_player)
++            try:
++                self._game.move(r, c)
++            except InvalidMoveError as e:
++                self._view.show_error(str(e))
++
++        self._view.show_board(self._game.board)
++        self._view.show_result(self._game.state, self._game.winner)
++
++
++def main() -> None:
++    size = 3
++    players = [Player("Mridul", Symbol("X")), Player("Riddhi", Symbol("O"))]
++    game = Game(Board(size), players, RowColDiagonalStrategy(size))
++    GameController(game, ConsoleView()).run()
++
++
++if __name__ == "__main__":
++    main()

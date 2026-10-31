@@ -1,0 +1,12 @@
+id = "ctx_unit_mismatch_timeout"
+description = "Adds a call to wait_for_job() with a timeout of 30000, intending milliseconds. Elsewhere (not in this diff) wait_for_job(job_id, timeout_s) takes seconds, so the call would block for over eight hours."
+split = "heldout"
+tags = ["bug", "needs_context", "units"]
+
+[[expected]]
+file_path = "app/jobs/export.py"
+line_start = 8
+side = "RIGHT"
+category = "bug"
+defect_type = "unit_mismatch"
+summary = "wait_for_job expects timeout in seconds but is passed 30000 (milliseconds), so the wait can block for ~8 hours."

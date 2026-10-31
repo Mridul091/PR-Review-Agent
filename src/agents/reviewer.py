@@ -13,11 +13,16 @@ from src.llm.base import (
     LLMProvider,
     MalformedProviderOutputError,
     OutputConstraints,
+    ProviderRejectedError,
+    RateLimitedError,
     ReviewModelRequest,
     ReviewResponseModel,
     TransientProviderError,
 )
 from src.review.schemas import ReviewFailure
+from src.utils.logging import get_logger
+
+logger = get_logger(__name__)
 
 
 @dataclass(frozen=True)
@@ -233,17 +238,30 @@ class Review:
                 return self._failed("malformed_model_output", attempt, retryable=False)
             except asyncio.TimeoutError:
                 return self._failed("provider_timeout", attempt, retryable=True)
-            except TransientProviderError:
+            except ProviderRejectedError as exc:
+                # Log the class and status only: the message may echo request content.
+                logger.warning("provider_rejected", status_code=exc.status_code, attempt=attempt)
+                return self._failed("provider_rejected", attempt, retryable=False)
+            except TransientProviderError as exc:
+                logger.warning(
+                    "provider_transient_error", error_type=type(exc).__name__, attempt=attempt
+                )
                 if attempt == self._max_attempts:
-                    return self._failed("provider_error", attempt, retryable=True)
+                    code = (
+                        "provider_rate_limited"
+                        if isinstance(exc, RateLimitedError)
+                        else "provider_unavailable"
+                    )
+                    return self._failed(code, attempt, retryable=True)
                 remaining = deadline - loop.time()
                 if remaining <= 0:
                     return self._failed("provider_timeout", attempt, retryable=True)
                 await asyncio.sleep(min(0.1 * 2 ** (attempt - 1), remaining))
                 continue
-            except Exception:
+            except Exception as exc:
                 # Do not include exception text: SDK errors can contain credentials
                 # or raw provider payloads. Cancellation is not an Exception here.
+                logger.warning("provider_unexpected_error", error_type=type(exc).__name__)
                 return self._failed("provider_error", attempt, retryable=False)
 
             try:
@@ -259,6 +277,9 @@ class Review:
             "provider_timeout": "The model review exceeded its time limit.",
             "malformed_model_output": "The model returned an invalid review response.",
             "provider_error": "The model review could not be completed.",
+            "provider_rate_limited": "The model provider rate limit was reached.",
+            "provider_unavailable": "The model provider was temporarily unavailable.",
+            "provider_rejected": "The model provider rejected the request.",
         }
         return ReviewOutcome(
             response=None,
