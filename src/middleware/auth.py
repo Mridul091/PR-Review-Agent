@@ -44,7 +44,7 @@ class AuthenticationMiddleware(BaseHTTPMiddleware):
             scheme.lower() != "bearer"
             or not token
             or not expected_token
-            or not hmac.compare_digest(token, expected_token)
+            or not hmac.compare_digest(token.encode("utf-8"), expected_token.encode("utf-8"))
         ):
             return JSONResponse(
                 status_code=401,

@@ -40,14 +40,15 @@ async def verify_github_signature(request: Request) -> None:
     if len(body) > settings.MAX_WEBHOOK_BYTES:
         raise HTTPException(status_code=413, detail="Webhook payload exceeds the size limit.")
 
-    # Local development and tests may intentionally run without a GitHub secret.
+    # Fail closed: skipping verification is an explicit opt-in, never a side effect of
+    # which environment name happens to be configured.
     if not settings.GITHUB_WEBHOOK_SECRET:
-        if settings.ENVIRONMENT not in {"development", "test"}:
+        if not settings.ALLOW_UNSIGNED_WEBHOOKS:
             logger.error("webhook_secret_missing")
             raise HTTPException(status_code=503, detail="Webhook verification is not configured.")
         logger.warning(
             "webhook_signature_skipped",
-            reason="GITHUB_WEBHOOK_SECRET not configured",
+            reason="GITHUB_WEBHOOK_SECRET not configured and ALLOW_UNSIGNED_WEBHOOKS is set",
         )
         return
 
@@ -70,7 +71,8 @@ async def verify_github_signature(request: Request) -> None:
         digestmod=hashlib.sha256,
     ).hexdigest()
 
-    if not hmac.compare_digest(expected_sig, provided_sig):
+    # Compare bytes: compare_digest raises TypeError for str with non-ASCII characters.
+    if not hmac.compare_digest(expected_sig.encode("utf-8"), provided_sig.encode("utf-8")):
         logger.error("webhook_signature_mismatch")
         raise HTTPException(status_code=401, detail="Webhook signature verification failed.")
 

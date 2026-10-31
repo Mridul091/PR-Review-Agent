@@ -53,6 +53,7 @@ Configure these values in `.env`:
 | `GITHUB_APP_ID` | GitHub App identifier |
 | `GITHUB_PRIVATE_KEY_PATH` | Path to the GitHub App PEM key |
 | `GITHUB_WEBHOOK_SECRET` | HMAC secret; mandatory in production |
+| `ALLOW_UNSIGNED_WEBHOOKS` | `true` lets webhooks through when no secret is set; local development only, rejected in production; defaults to `false` |
 | `REVIEW_API_TOKEN` | Bearer token for the review API |
 | `REVIEW_REPOSITORY_ACCESS` | JSON mapping installation IDs to target repositories allowed for that token; defaults to no access |
 | `MAX_PR_FILES` | Maximum files accepted in one review |
@@ -89,7 +90,7 @@ The service schedules reviews for `opened`, `synchronize`, and `reopened`. Other
 - `pull_request.base.sha` and `pull_request.head.sha`
 - `installation.id`
 
-In production, application startup fails when `GITHUB_WEBHOOK_SECRET` is absent. Development and test environments may omit it for local work and emit a warning.
+In production, application startup fails when `GITHUB_WEBHOOK_SECRET` is absent. In every environment, webhooks are rejected with `503` when no secret is set, unless `ALLOW_UNSIGNED_WEBHOOKS=true` is set explicitly (local development only; production refuses to start with it).
 
 ## Validation
 

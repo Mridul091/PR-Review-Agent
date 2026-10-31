@@ -7,6 +7,14 @@ import pytest
 FIXTURES = Path(__file__).parent / "fixtures"
 
 
+@pytest.fixture(autouse=True)
+def allow_unsigned_webhooks(monkeypatch):
+    """Webhook verification fails closed; the suite opts in so it can omit a secret."""
+    from src.config import settings
+
+    monkeypatch.setattr(settings, "ALLOW_UNSIGNED_WEBHOOKS", True)
+
+
 @pytest.fixture
 def diff_fixture():
     """Load a named unified-diff fixture."""

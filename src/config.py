@@ -25,6 +25,8 @@ class Settings(BaseSettings):
     LOG_LEVEL: str = "INFO"
     ENVIRONMENT: Literal["development", "test", "production"] = "development"
     REVIEW_API_TOKEN: Optional[str] = None
+    # Local development only: accept webhooks when GITHUB_WEBHOOK_SECRET is unset.
+    ALLOW_UNSIGNED_WEBHOOKS: bool = False
     # Installation IDs mapped to target repositories permitted for the API token.
     REVIEW_REPOSITORY_ACCESS: dict[int, list[str]] = Field(default_factory=dict)
 
@@ -63,6 +65,8 @@ class Settings(BaseSettings):
             raise ValueError("GITHUB_WEBHOOK_SECRET is required in production")
         if self.ENVIRONMENT == "production" and not self.REVIEW_API_TOKEN:
             raise ValueError("REVIEW_API_TOKEN is required in production")
+        if self.ENVIRONMENT == "production" and self.ALLOW_UNSIGNED_WEBHOOKS:
+            raise ValueError("ALLOW_UNSIGNED_WEBHOOKS is not allowed in production")
         if self.ENVIRONMENT == "production" and self.LLM_PROVIDER == "fake":
             raise ValueError("LLM_PROVIDER=fake is not allowed in production")
         for installation_id, repositories in self.REVIEW_REPOSITORY_ACCESS.items():

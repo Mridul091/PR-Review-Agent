@@ -203,6 +203,38 @@ def test_webhook_requires_valid_signature_when_configured(client, monkeypatch):
     assert valid.json()["status"] == "accepted"
 
 
+def test_webhook_without_secret_fails_closed_by_default(client, monkeypatch):
+    monkeypatch.setattr(settings, "GITHUB_WEBHOOK_SECRET", None)
+    monkeypatch.setattr(settings, "ALLOW_UNSIGNED_WEBHOOKS", False)
+    response = client.post(
+        "/api/v1/webhook",
+        content=json.dumps(reviewable_payload(number=44)),
+        headers=delivery_headers(),
+    )
+    assert response.status_code == 503
+
+
+def test_webhook_without_secret_is_accepted_only_with_explicit_opt_in(client, monkeypatch):
+    monkeypatch.setattr(settings, "GITHUB_WEBHOOK_SECRET", None)
+    monkeypatch.setattr(settings, "ALLOW_UNSIGNED_WEBHOOKS", True)
+    response = client.post(
+        "/api/v1/webhook",
+        content=json.dumps(reviewable_payload(number=45)),
+        headers=delivery_headers(),
+    )
+    assert response.status_code == 202
+
+
+def test_webhook_non_ascii_signature_is_rejected_not_a_server_error(client, monkeypatch):
+    monkeypatch.setattr(settings, "GITHUB_WEBHOOK_SECRET", "test-webhook-secret")
+    response = client.post(
+        "/api/v1/webhook",
+        content=json.dumps(reviewable_payload(number=46)),
+        headers=delivery_headers(**{"X-Hub-Signature-256": "sha256=caf\u00e9".encode("latin-1")}),
+    )
+    assert response.status_code == 401
+
+
 def test_webhook_rejects_oversized_payload(client, monkeypatch):
     monkeypatch.setattr(settings, "MAX_WEBHOOK_BYTES", 10)
     response = client.post(

@@ -20,6 +20,22 @@ def test_local_development_can_omit_webhook_secret():
     assert configured.GITHUB_WEBHOOK_SECRET is None
 
 
+def test_unsigned_webhooks_default_to_disabled():
+    assert Settings(_env_file=None).ALLOW_UNSIGNED_WEBHOOKS is False
+
+
+def test_production_rejects_unsigned_webhooks():
+    with pytest.raises(ValidationError, match="ALLOW_UNSIGNED_WEBHOOKS"):
+        Settings(
+            _env_file=None,
+            ENVIRONMENT="production",
+            GITHUB_WEBHOOK_SECRET="secret",
+            REVIEW_API_TOKEN="token",
+            LLM_PROVIDER="groq",
+            ALLOW_UNSIGNED_WEBHOOKS=True,
+        )
+
+
 def test_limits_must_be_positive():
     with pytest.raises(ValidationError, match="MAX_PR_FILES"):
         Settings(_env_file=None, MAX_PR_FILES=0)

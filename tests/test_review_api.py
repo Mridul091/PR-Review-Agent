@@ -92,6 +92,15 @@ def test_review_routes_require_valid_token():
         assert client.app.state.review_service.calls == 0
 
 
+def test_non_ascii_bearer_token_is_rejected_not_a_server_error():
+    with _test_client() as client:
+        response = client.get(
+            "/api/v1/reviews/review-123",
+            headers={"Authorization": "Bearer caf\u00e9".encode("latin-1")},
+        )
+        assert response.status_code == 401
+
+
 def test_post_denies_other_repositories_and_installations_without_calling_service():
     with _test_client() as client:
         for changes in ({"repository": "other/repo"}, {"installation_id": 13}):
