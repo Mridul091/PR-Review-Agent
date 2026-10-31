@@ -138,8 +138,8 @@ async def github_webhook(
     Returns 202 immediately so GitHub does not retry.
     Heavy work happens in _run_pr_review as a BackgroundTask.
     """
-    event_type = request.headers.get("X-GitHub-Event", "unknown")
-    delivery_id = request.headers.get("X-GitHub-Delivery", "unknown")
+    event_type = request.headers.get("X-GitHub-Event")
+    delivery_id = request.headers.get("X-GitHub-Delivery")
     try:
         payload: dict = await request.json()
     except (ValueError, UnicodeDecodeError) as exc:
@@ -174,6 +174,33 @@ async def github_webhook(
             pr_number=pr_number,
             gh_action=action,
         )
+
+        if not delivery_id:
+            raise HTTPException(status_code=400, detail="Delivery id should be valid")
+        store = get_review_store(request)
+        won = await store.claim_review(
+            delivery_id,
+            installation_id=review_request.installation_id,
+            repository=review_request.repository,
+            pull_request_number=review_request.pull_request_number,
+            head_sha=review_request.head_sha,
+        )
+
+        if won is False:
+            logger.info(
+                "webhook_duplicate",
+                delivery_id=delivery_id,
+                pr_number=pr_number,
+                head_sha=review_request.head_sha,
+            )
+            return {
+                "status": "duplicate",
+                "event": event_type,
+                "action": action,
+                "repo": repo,
+                "pr_number": pr_number,
+                "message": f"Review job rejected because of duplicate PR #{pr_number} on {repo}.",
+            }
         background_tasks.add_task(_run_pr_review, review_request, action, service, request)
 
         return {
